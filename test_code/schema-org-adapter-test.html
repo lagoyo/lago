@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>schema-org-adapter test</title>
+    <style type="text/css">
+        html.busy, html.busy * {
+            cursor: wait !important;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/semantifyit/schema-org-adapter/dist/schema-org-adapter.min.js"></script>
+    <script>
+        const mySDOAdapter = new SDOAdapter()
+
+
+        function getCategories() {
+            return mySDOAdapter.getListOfClasses().sort();
+        }
+
+        function setBusy(isBusy) {
+            if( isBusy ) {
+                $('body').addClass('busy');
+            }
+            else {
+                $('body').removeClass('busy');
+            }
+        }
+
+        function onCategory(category) {
+
+            if( category.indexOf("schema:") < 0 ) return ;
+            let obj = mySDOAdapter.getClass(category);
+            if( obj == null ) return ;
+
+            let properties = obj.getProperties(true);
+            console.log(properties);
+        }
+
+        function initCategories() {
+            $('#category').empty();
+
+            let categories = getCategories();
+            console.log("categories are");
+            console.log(categories);
+
+
+            for( let i=0; i<categories.length; i++) {
+                let name=categories[i].split(':')[1];
+                let option=$("<option>"+name+"</option>").prop("value", categories[i]);
+                if( name == "Dataset" ) {
+                    option.prop("selected", "selected");
+                }
+                $('#category').append(option);
+            }
+
+            $('#category').on('change', function () {
+                onCategory(this.value);
+            });
+            onCategory( $('#category option:selected').val() );
+        }
+        async function main() {
+            setBusy(true);
+            const urlLatestSDO = await mySDOAdapter.constructSDOVocabularyURL('latest', 'all-layers');
+            // resolves to "https://raw.githubusercontent.com/schemaorg/schemaorg/master/data/releases/6.0/all-layers.jsonld" if 6.0 is the latest version
+            await mySDOAdapter.addVocabularies([urlLatestSDO])
+            setBusy(false);
+
+            /*let Hotel = mySDOAdapter.getClass('schema:Dataset')
+            let measurementTechnique = mySDOAdapter.getProperty("schema:abstract");
+            console.log("measurementTechnique is");
+            console.log(measurementTechnique);
+            let _Proper = Hotel.getProperties() // 117 -> ["schema:audience", "schema:checkinTime", "schema:availableLanguage", ...]
+            Hotel.getSuperClasses(false) //only direct superclasses: 1 -> ["schema:LodgingBusiness"]
+            Hotel.getSuperClasses() //5 -> ["schema:LodgingBusiness", "schema:LocalBusiness", "schema:Place", "schema:Organization", "schema:Thing"]
+
+            console.log("Dataset is");
+            console.log(_Proper);
+            */
+            /*
+            let address = mySDOAdapter.getProperty("schema:DataCatalog")
+            address.getRanges() // 2 -> ["schema:PostalAddress", "schema:Text"]
+            address.getDomains(false) // only direct domains: 5 -> ["schema:Place", "schema:GeoCoordinates", "schema:GeoShape", "schema:Person", "schema:Organization"]
+            address.getDomains() // 229 -> ["schema:Place", "schema:Accommodation", "schema:TouristAttraction", ...]
+
+             */
+            initCategories();
+        }
+
+
+        $(function(){
+            main();
+        });
+    </script>
+</head>
+<body>
+<H1><a  href="https://www.npmjs.com/package/schema-org-adapter"> schema-org-adapter </a> test</H1>
+
+category : <select name="category" id="category"><br>
+properties :
+
+</select>
+</body>
+</html>
