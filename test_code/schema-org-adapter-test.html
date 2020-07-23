@@ -33,8 +33,30 @@
             let obj = mySDOAdapter.getClass(category);
             if( obj == null ) return ;
 
-            let properties = obj.getProperties(true);
+            let properties = obj.getProperties(false);
+            console.log("properties : ");
             console.log(properties);
+            $('#properties').empty();
+            for( let i=0; i<properties.length; i++) {
+                let name=properties[i].split(':')[1];
+                let property = mySDOAdapter.getProperty(properties[i]);
+                let dataTypes = property.getRanges(false);
+                let strTypes = "";
+                for( let j=0; j<dataTypes.length; j++) {
+                    let isClass = false;
+                    if( j!=0 ) strTypes += "<br>";
+                    strTypes += dataTypes[j].split(':')[1];
+
+
+                }
+                let option=$("<tr><td>"+property.getName()+"</td><td>"+strTypes
+                    +"</td><td>"+ property.getDescription() +"</td></tr>");
+
+                $('#properties').append(option);
+
+                console.log(property.getName());
+                console.log(property.toJSON());
+            }
         }
 
         function initCategories() {
@@ -96,9 +118,15 @@
 <body>
 <H1><a  href="https://www.npmjs.com/package/schema-org-adapter"> schema-org-adapter </a> test</H1>
 
-category : <select name="category" id="category"><br>
+category : <select name="category" id="category"></select><br>
 properties :
+<table>
+    <thead>
+    <tr><td>name</td><td>type</td><td>description</td></tr>
+    </thead>
+    <tbody id="properties">
 
-</select>
+    </tbody>
+</table>
 </body>
 </html>
