@@ -36,7 +36,10 @@
             let properties = obj.getProperties(false);
             console.log("properties : ");
             console.log(properties);
-            $('#properties').empty();
+            $('#div_properties').empty();
+            let properties_html = $('#template_properties').html();
+            $('#div_properties').append($(properties_html));
+            let $properties = $('#div_properties').find('tbody');
             for( let i=0; i<properties.length; i++) {
                 let name=properties[i].split(':')[1];
                 let property = mySDOAdapter.getProperty(properties[i]);
@@ -52,7 +55,7 @@
                 let option=$("<tr><td>"+property.getName()+"</td><td>"+strTypes
                     +"</td><td>"+ property.getDescription() +"</td></tr>");
 
-                $('#properties').append(option);
+                $properties.append(option);
 
                 console.log(property.getName());
                 console.log(property.toJSON());
@@ -120,13 +123,20 @@
 
 category : <select name="category" id="category"></select><br>
 properties :
-<table>
-    <thead>
-    <tr><td>name</td><td>type</td><td>description</td></tr>
-    </thead>
-    <tbody id="properties">
 
-    </tbody>
-</table>
+<div id="div_properties">
+
+</div>
+
+<div id="template_properties" style="display: none">
+    <table>
+        <thead>
+        <tr><td>name</td><td>type</td><td>description</td></tr>
+        </thead>
+        <tbody >
+
+        </tbody>
+    </table>
+</div>
 </body>
 </html>
