@@ -8,23 +8,21 @@
             <!--              <md-icon>menu</md-icon>-->
             <!--            </md-button>-->
 
-            <span class="md-title">LAGO SCHAMA</span>
+            <span class="md-title">라고 / LAGO : the data typed as </span>
           </div>
 
-          <div class="md-toolbar-section-end">
-            <md-button class="md-icon-button">
-              <md-icon>more_vert</md-icon>
-            </md-button>
-          </div>
+<!--          <div class="md-toolbar-section-end">-->
+<!--            <md-button class="md-icon-button">-->
+<!--              <md-icon>more_vert</md-icon>-->
+<!--            </md-button>-->
+<!--          </div>-->
         </div>
         <div class="md-toolbar-row">
           <md-tabs class="md-primary" md-sync-route>
-            <md-tab id="tab-input" md-label="Schema Input" to="/schema/gencode"></md-tab>
-            <md-tab id="tab-my" md-label="My Schemas" to="/schema/my">
-              <p>my tab</p>
-            </md-tab>
-            <md-tab id="tab-browser" md-label="Schema Browser" to="/schema/browser"></md-tab>
-            <md-tab id="tab-about" md-label="About" to="/schema/about"></md-tab>
+            <md-tab id="tab-input" md-label="Schema Input" to="/schema/gencode"/>
+            <md-tab id="tab-my" md-label="My Schemas" to="/schema/my"/>
+            <md-tab id="tab-browser" md-label="Schema Browser" to="/schema/browser"/>
+            <md-tab id="tab-about" md-label="About" to="/schema/about"/>
             <md-tab id="dashboard" md-label="Dashboard" to="/dashboard"/>
           </md-tabs>
         </div>
