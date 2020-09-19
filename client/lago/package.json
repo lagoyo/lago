@@ -12,7 +12,8 @@
     "vue": "^2.6.11",
     "vue-clickaway": "^2.2.2",
     "vue-json-pretty": "^1.6.7",
-    "vue-material": "^1.0.0-beta-15"
+    "vue-material": "^1.0.0-beta-15",
+    "schema-org-adapter": "^3.0.4"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.4.0",
