@@ -19,25 +19,31 @@
             <div class="md-layout">
               <div class="md-layout-item">
                 <md-content class="md-scrollbar">
-                <md-list>
-                  <md-subheader>Select schema class</md-subheader>
-                  <md-list-item  v-for="cl in sdo.sdoClasses" v-bind:key="cl.name"
-                                 @click="getSchemaInfo(cl.value)">
-                    <span class="md-list-item-text">{{cl.name}}</span>
-                  </md-list-item>
-                </md-list>
+                  <md-list>
+                    <md-subheader>Select schema class</md-subheader>
+                    <md-list-item v-for="cl in sdo.sdoClasses"
+                                  v-bind:key="cl.name"
+                                  v-bind:class="selectedSchema === cl.value ? 'selected': ''"
+                                  @click="getSchemaInfo(cl.value)">{{cl.name}}
+                    </md-list-item>
+<!--                    <md-list-item v-for="cl in sdo.sdoClasses" v-bind:key="cl.name"-->
+<!--                                  @click="getSchemaInfo(cl.value)">-->
+<!--                      <span class="md-list-item-text">{{cl.name}}</span>-->
+<!--                    </md-list-item>-->
+                  </md-list>
                 </md-content>
+                <md-divider></md-divider>
                 <div v-if="selected">
                   <p>설명: <span>{{selected.getDescription()}}</span></p>
                   <p>이름: <span>{{selected.getName()}}</span></p>
                   <p>IRI: <a :target="selected.getName()" :href="selected.getIRI()">{{selected.getIRI()}}</a></p>
                 </div>
-<!--                <md-field>-->
-<!--                  <label>Select Schema Class</label>-->
-<!--                  <md-select v-model="selectedClass" id="selectedClass1" name="selClass">-->
-<!--                    <md-option v-for="cl in sdo.sdoClasses" v-bind:key="cl.name" :value="cl.value">{{cl.name}}</md-option>-->
-<!--                  </md-select>-->
-<!--                </md-field>-->
+                <!--                <md-field>-->
+                <!--                  <label>Select Schema Class</label>-->
+                <!--                  <md-select v-model="selectedClass" id="selectedClass1" name="selClass">-->
+                <!--                    <md-option v-for="cl in sdo.sdoClasses" v-bind:key="cl.name" :value="cl.value">{{cl.name}}</md-option>-->
+                <!--                  </md-select>-->
+                <!--                </md-field>-->
               </div>
               <div class="md-layout-item md-scrollbar">
                 <vue-json-pretty :data="srcObject" :deep="4"></vue-json-pretty>
@@ -104,6 +110,7 @@ export default {
       // 현재 활성화된 스텝 정보
       active: 'first',
       selected: null,
+      selectedSchema: null,
       sdo: {}
     }
   },
@@ -135,11 +142,16 @@ export default {
       }
     },
     getSchemaInfo (category) {
-      if (category.indexOf('schema:') < 0) { return }
+      if (category.indexOf('schema:') < 0) {
+        return
+      }
       const obj = this.sdo.sdo.getClass(category)
-      if (obj == null) { return }
-      console.log('get schema info', category, obj.getDescription(), obj)
-      console.log(category, JSON.stringify(obj))
+      if (obj == null) {
+        return
+      }
+      this.selectedSchema = category
+      // console.log('get schema info', category, obj.getDescription(), obj)
+      // console.log(category, JSON.stringify(obj))
       this.selected = obj
     },
     setDone (id, index) {
@@ -161,7 +173,10 @@ export default {
     downloadAsFile () {
       console.log('func is called!')
     }
+  },
+  computed: {
   }
+
 }
 </script>
 
@@ -179,6 +194,10 @@ export default {
   .md-scrollbar {
     max-height: 300px;
     overflow: auto;
+  }
+
+  .selected {
+    background-color: antiquewhite;
   }
 
 </style>
