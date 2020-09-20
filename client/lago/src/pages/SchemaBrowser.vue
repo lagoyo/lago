@@ -1,6 +1,6 @@
 <template>
   <div class="md-layout">
-    <div class="md-layout-item md-large-size-25 ">
+    <div class="md-layout-item md-large-size-20 ">
       <md-subheader>Select schema class</md-subheader>
       <md-content class="md-scrollbar">
         <md-list>
@@ -12,16 +12,25 @@
         </md-list>
       </md-content>
     </div>
-    <div class="md-list-item md-layout-nowrap md-large-size-15">
-      <md-table v-model="users" :table-header-color="tableHeaderColor">
-        <md-table-row slot="md-table-row" slot-scope="{ item }">
-          <md-table-cell md-label="ID">{{ item.id }}</md-table-cell>
-          <md-table-cell md-label="Name">{{ item.name }}</md-table-cell>
-          <md-table-cell md-label="Salary">{{ item.salary }}</md-table-cell>
-          <md-table-cell md-label="Country">{{ item.country }}</md-table-cell>
-          <md-table-cell md-label="City">{{ item.city }}</md-table-cell>
-        </md-table-row>
-      </md-table>
+    <div class="md-list-item md-large-size-80 md-layout-nowrap md-centered">
+      <div v-if="selected">
+        <div class="summary">
+          <p>이름: <span>{{selected.getName()}}</span></p>
+          <p class="descr">설명: <span v-html="selected.getDescription()"></span></p>
+          <p>IRI: <a :target="selected.getName()" :href="selected.getIRI()">{{selected.getIRI()}}</a></p>
+        </div>
+        <md-divider></md-divider>
+        <md-table v-model="props" :table-header-color="tableHeaderColor">
+          <md-table-row slot="md-table-row" slot-scope="{ item }">
+            <md-table-cell md-label="Name">{{ item.name }}</md-table-cell>
+            <md-table-cell md-label="Type" class="type" v-html="item.type"></md-table-cell>
+            <md-table-cell md-label="Description" class="descr" v-html="item.desc"></md-table-cell>
+          </md-table-row>
+        </md-table>
+      </div>
+      <div v-else>
+        <p>스키마를 선택하세요.</p>
+      </div>
     </div>
   </div>
 </template>
@@ -30,45 +39,13 @@
 
 export default {
   name: 'SchemaBrowser',
-
   components: {
-    // OrderedTable
   },
   data () {
     return {
-      sel: null,
+      selected: null,
       selectedSchema: null,
-      selected: [],
-      users: [
-        {
-          id: 1,
-          name: 'Dakota Rice',
-          salary: '$36,738',
-          country: 'Niger',
-          city: 'Oud-Turnhout'
-        },
-        {
-          id: 2,
-          name: 'Minerva Hooper',
-          salary: '$23,738',
-          country: 'Curaçao',
-          city: 'Sinaai-Waas'
-        },
-        {
-          id: 3,
-          name: 'Sage Rodriguez',
-          salary: '$56,142',
-          country: 'Netherlands',
-          city: 'Overland Park'
-        },
-        {
-          id: 4,
-          name: 'Philip Chaney',
-          salary: '$38,735',
-          country: 'Korea, South',
-          city: 'Gloucester'
-        }
-      ]
+      props: []
     }
   },
   props: {
@@ -87,7 +64,28 @@ export default {
         return
       }
       this.selectedSchema = category
-      this.sel = obj
+      this.selected = obj
+      this.props = []
+      const props = this.selected.getProperties(false)
+      console.log('propertis', props)
+      props.forEach((p, idx) => {
+        console.log('p', p)
+        const name = p.split(':')[1]
+        console.log('name', name)
+        const prop = this.$sdo.sdo.getProperty(p)
+        const dataTypes = prop.getRanges(false)
+        const strTypes = []
+        for (let j = 0; j < dataTypes.length; j++) {
+          strTypes.push(dataTypes[j].split(':')[1])
+        }
+        this.props.push({
+          id: idx + 1,
+          name: name,
+          type: strTypes.join('<br>'),
+          desc: prop.getDescription()
+        })
+        console.log('this.props', this.props)
+      })
     }
   }
 }
@@ -100,6 +98,15 @@ export default {
   .md-scrollbar {
     max-height: 300px;
     overflow: auto;
+  }
+  .summary {
+    width: auto;
+  }
+  .type {
+    max-width: fit-content;
+  }
+  .descr {
+    max-width: fit-content;
   }
 
 </style>
