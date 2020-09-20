@@ -12,7 +12,7 @@
         </md-list>
       </md-content>
     </div>
-    <div class="md-list-item md-large-size-80 md-layout-nowrap md-centered">
+    <div class="md-list-item md-large-size-80 md-layout-nowrap md-centered ">
       <div v-if="selected">
         <div class="summary">
           <p>이름: <span>{{selected.getName()}}</span></p>
@@ -100,6 +100,7 @@ export default {
     overflow: auto;
   }
   .summary {
+    padding: 15px;
     width: auto;
   }
   .type {
