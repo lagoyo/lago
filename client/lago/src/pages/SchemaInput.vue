@@ -26,10 +26,6 @@
                                   v-bind:class="selectedSchema === cl.value ? 'selected': ''"
                                   @click="getSchemaInfo(cl.value)">{{cl.name}}
                     </md-list-item>
-<!--                    <md-list-item v-for="cl in sdo.sdoClasses" v-bind:key="cl.name"-->
-<!--                                  @click="getSchemaInfo(cl.value)">-->
-<!--                      <span class="md-list-item-text">{{cl.name}}</span>-->
-<!--                    </md-list-item>-->
                   </md-list>
                 </md-content>
                 <md-divider></md-divider>
