@@ -19,11 +19,11 @@
         </div>
         <div class="md-toolbar-row">
           <md-tabs class="md-primary" md-sync-route>
-            <md-tab id="tab-input" md-label="Schema Input" to="/schema/gencode"/>
-            <md-tab id="tab-my" md-label="My Schemas" to="/schema/my"/>
-            <md-tab id="tab-browser" md-label="Schema Browser" to="/schema/browser"/>
-            <md-tab id="tab-about" md-label="About" to="/schema/about"/>
             <md-tab id="dashboard" md-label="Dashboard" to="/dashboard"/>
+            <md-tab id="tab-input" md-label="Schema Input" to="/schema/gencode"/>
+            <md-tab id="tab-browser" md-label="Schema Browser" to="/schema/browser"/>
+            <md-tab id="tab-my" md-label="My Schemas" to="/schema/my"/>
+            <md-tab id="tab-about" md-label="About" to="/schema/about"/>
           </md-tabs>
         </div>
       </md-app-toolbar>
