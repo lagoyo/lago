@@ -13,6 +13,8 @@ import routes from './routes'
 // import GlobalComponents from "./globalComponents";
 import GlobalDirectives from './globalDirectives'
 
+import SDOAdapter from 'schema-org-adapter'
+
 Vue.use(VueMaterial)
 
 // change multiple options
@@ -35,9 +37,63 @@ Vue.use(GlobalDirectives)
 
 Vue.config.productionTip = false
 
+const shared = {
+  ready: false
+}
+
+async function initSdo () {
+  const sdo = new SDOAdapter()
+  console.log('sdo is', sdo)
+  const urlLatestSDO = await sdo.constructSDOVocabularyURL('latest', 'all-layers')
+  // resolves to "https://raw.githubusercontent.com/schemaorg/schemaorg/master/data/releases/6.0/all-layers.jsonld" if 6.0 is the latest version
+  await sdo.addVocabularies([urlLatestSDO])
+
+  const temp = sdo.getListOfClasses().sort()
+  const sdoClasses = temp.map(function (x) {
+    return {
+      value: x,
+      name: x.split(':')[1]
+    }
+  })
+  console.log('sdoClasses', sdoClasses)
+  return {
+    sdo: sdo,
+    sdoClasses: sdoClasses
+  }
+}
+
+shared.install = function () {
+  console.log('install called')
+  initSdo().then((response) => {
+    console.log('in install', response)
+    shared.sdo = response.sdo
+    shared.sdoClasses = response.sdoClasses
+    return response
+  })
+  Object.defineProperty(Vue.prototype, '$sdo', {
+    get () { return shared }
+  })
+}
+
+Vue.use(shared)
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   render: h => h(App),
-  router
+  router,
+  data: {
+    sdo: {}
+  },
+  // created () {
+  //   console.log('created called')
+  //   initSdo().then((response) => {
+  //     console.log('in created', response)
+  //     this.$set(this, 'sdo', response)
+  //     return response
+  //   })
+  // },
+  mounted () {
+    console.log(this.sdo)
+  }
 })

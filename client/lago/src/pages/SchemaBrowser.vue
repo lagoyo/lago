@@ -4,7 +4,7 @@
       <md-subheader>Select schema class</md-subheader>
       <md-content class="md-scrollbar">
         <md-list>
-          <md-list-item v-for="cl in sdo.sdoClasses"
+          <md-list-item v-for="cl in $sdo.sdoClasses"
                         v-bind:key="cl.name"
                         v-bind:class="selectedSchema === cl.value ? 'selected': ''"
                         @click="getSchemaInfo(cl.value)">{{cl.name}}
@@ -27,28 +27,6 @@
 </template>
 
 <script>
-import SDOAdapter from 'schema-org-adapter'
-// import { OrderedTable } from '../components'
-async function initSdo () {
-  const sdo = new SDOAdapter()
-  console.log('sdo is', sdo)
-  const urlLatestSDO = await sdo.constructSDOVocabularyURL('latest', 'all-layers')
-  // resolves to "https://raw.githubusercontent.com/schemaorg/schemaorg/master/data/releases/6.0/all-layers.jsonld" if 6.0 is the latest version
-  await sdo.addVocabularies([urlLatestSDO])
-
-  const temp = sdo.getListOfClasses().sort()
-  const sdoClasses = temp.map(function (x) {
-    return {
-      value: x,
-      name: x.split(':')[1]
-    }
-  })
-  console.log('sdoClasses', sdoClasses)
-  return {
-    sdo: sdo,
-    sdoClasses: sdoClasses
-  }
-}
 
 export default {
   name: 'SchemaBrowser',
@@ -56,19 +34,10 @@ export default {
   components: {
     // OrderedTable
   },
-  created () {
-    console.log('created called!!')
-    initSdo().then((response) => {
-      console.log(response)
-      this.$set(this, 'sdo', response)
-      return response
-    })
-  },
   data () {
     return {
       sel: null,
       selectedSchema: null,
-      sdo: {},
       selected: [],
       users: [
         {
@@ -113,13 +82,11 @@ export default {
       if (category.indexOf('schema:') < 0) {
         return
       }
-      const obj = this.sdo.sdo.getClass(category)
+      const obj = this.$sdo.sdo.getClass(category)
       if (obj == null) {
         return
       }
       this.selectedSchema = category
-      // console.log('get schema info', category, obj.getDescription(), obj)
-      // console.log(category, JSON.stringify(obj))
       this.sel = obj
     }
   }
