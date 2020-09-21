@@ -41,11 +41,13 @@ function convert( src_data ) {
 function generateCode(src_data)
 {
     let dataObj = convert(src_data);
-
+    dataObj["@context"] = "http://schema.org/" + "DataSet"; // 변수 처리
     let ret = {
         "JSON-LD" : JSON.stringify(dataObj, null, '\t'),
         "object" : dataObj,
+        "category" : "DataSet", // 변수 처리
         "src_data" : src_data
     }
+    delete dataObj["@context"];
     return ret;
 }
