@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapping TEST</title>
+    <style type="text/css">
+        html.busy, html.busy * {
+            cursor: wait !important;
+        }
+
+        table {
+            width: 100%;
+            border: 1px solid #444444;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #444444;
+            padding: 10px;
+        }
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/gh/semantifyit/schema-org-adapter/dist/schema-org-adapter.min.js"></script>
+    <script src="https://unpkg.com/mustache@latest"></script>
+    <script src="./mapping.js"></script>
+
+</head>
+<body>
+<script>
+    let data = {
+        src_1 : "소스1",
+        src_2 : "소스2",
+        src_3 : "소스3",
+        dummy : "아무 데이터"
+    }
+
+    /*
+    var obj = generateCode(data);
+    var a = 1;
+
+    console.log( obj );
+    */
+
+    let test_map =
+        {
+            "aaa" : {
+                "aaa_1" : "source src_1 {{src_1}}",
+                "aaa_2" : "source src_2 {{src_2}}",
+            },
+            "bbb" : "{{src_2}} - {{src_3}}" ,
+            "ccc" : "{{src_1}}"
+        };
+    let str = generateSource("js", "DataSet", test_map );
+    console.log(str);
+</script>
+</body>
+</html>

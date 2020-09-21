@@ -3,7 +3,7 @@
 
 
 
-let js_template = `
+
 function _conv( data_mapping, src_data ) {
     let ret = {
 
@@ -22,8 +22,14 @@ function _conv( data_mapping, src_data ) {
 
 
 function convert( src_data ) {
-    let data_mapping = {{&mapping}};
-
+    let data_mapping = {
+        "aaa" : {
+            "aaa_1" : "source src_1 {{src_1}}",
+            "aaa_2" : "source src_2 {{src_2}}",
+        },
+        "bbb" : "{{src_2}} - {{src_3}}" ,
+        "ccc" : "{{src_1}}"
+    }
 
     return _conv(data_mapping, src_data );
 }
@@ -31,22 +37,13 @@ function convert( src_data ) {
 function generateCode(src_data)
 {
     let dataObj = convert(src_data);
-    dataObj["@context"] = "http://schema.org/{{category}}"; // 변수 처리
+    dataObj["@context"] = "http://schema.org/" + "DataSet"; // 변수 처리
     let ret = {
         "JSON-LD" : JSON.stringify(dataObj, null, '\t'),
         "object" : dataObj,
-        "category" : "{{category}}", 
+        "category" : "DataSet", // 변수 처리
         "src_data" : src_data
     }
     delete dataObj["@context"];
     return ret;
-}
-`;
-
-
-
-
-function generateSource( lang, category, map ) {
-    let mapping = JSON.stringify(map, null, '\t');
-    return Mustache.render(js_template, { category : category, mapping : mapping } );
 }
