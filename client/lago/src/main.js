@@ -55,7 +55,6 @@ async function initSdo () {
       name: x.split(':')[1]
     }
   })
-  console.log('sdoClasses', sdoClasses)
   return {
     sdo: sdo,
     sdoClasses: sdoClasses
@@ -68,6 +67,7 @@ shared.install = function () {
     console.log('in install', response)
     shared.sdo = response.sdo
     shared.sdoClasses = response.sdoClasses
+    shared.ready = true
     return response
   })
   Object.defineProperty(Vue.prototype, '$sdo', {

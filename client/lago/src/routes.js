@@ -3,6 +3,7 @@ import DashboardLayout from './pages/layout/DashboardLayout.vue'
 import Dashboard from './pages/Dashboard.vue'
 import SchemaInput from './pages/SchemaInput'
 import SchemaBrowser from './pages/SchemaBrowser'
+import SchemaTreeBrowser from './pages/SchemaTree'
 import SchemaContent from './pages/layout/SchemaContent'
 import About from './pages/About'
 import MySchemaList from './pages/MySchemaList'
@@ -28,6 +29,10 @@ const routes = [
           {
             path: 'browser',
             component: SchemaBrowser
+          },
+          {
+            path: 'tree',
+            component: SchemaTreeBrowser
           },
           {
             path: 'my',
