@@ -2,15 +2,6 @@
   <div class="md-layout">
     <div class="md-layout-item md-large-size-20 ">
       <md-subheader>Select schema class</md-subheader>
-      <md-content class="md-scrollbar">
-        <md-list>
-          <md-list-item v-for="cl in sdoClasses"
-                        v-bind:key="cl.name"
-                        v-bind:class="selectedSchema === cl.value ? 'selected': ''"
-                        @click="getSchemaInfo(cl.value)">{{cl.name}}
-          </md-list-item>
-        </md-list>
-      </md-content>
     </div>
     <div class="md-layout-item md-large-size-80 md-layout-nowrap md-centered ">
       <div v-if="selected">
@@ -65,7 +56,7 @@
 <script>
 
 export default {
-  name: 'SchemaBrowser',
+  name: 'SchemaTreeBrowser',
   components: {
   },
   data () {
