@@ -1,64 +1,82 @@
 <template>
   <div class="content">
-    <md-card>
-      <md-card-header data-background-color="orange">
-        <h4 class="title">스키마와 함께 코드 생성하기</h4>
-        <p class="category">기존의 문서를 입력합니다.</p>
-      </md-card-header>
-      <md-card-content>
-        <md-steppers :md-active-step.sync="active">
-          <md-step id="first" md-label="데이터 입력하기" :md-done.sync="first">
-            <md-field>
-              <label>스키마로 변경할 데이터를 여기에 입력하세요.</label>
-              <md-textarea v-model="srcData" id="srcData"></md-textarea>
-            </md-field>
-            <md-content v-if="firstStepError"><p>{{firstStepError}}</p></md-content>
-            <md-button class="md-raised md-primary" @click="loadJson()">Continue</md-button>
-          </md-step>
-          <md-step class="second" id="second" md-label="관련 스키마 입력하기" :md-done.sync="second">
-            <div class="md-layout">
-              <div class="md-layout-item">
-                <md-content class="md-scrollbar">
-                  <md-list>
-                    <md-subheader>Select schema class</md-subheader>
-                    <md-list-item v-for="cl in $sdo.sdoClasses"
-                                  v-bind:key="cl.name"
-                                  v-bind:class="selectedSchema === cl.value ? 'selected': ''"
-                                  @click="getSchemaInfo(cl.value)">{{cl.name}}
-                    </md-list-item>
-                  </md-list>
-                </md-content>
-                <md-divider></md-divider>
-                <div v-if="selected">
-                  <p>설명: <span>{{selected.getDescription()}}</span></p>
+    <v-stepper v-model="e1">
+      <v-stepper-header>
+        <v-stepper-step id="first" :complete="e1 > 1" step="1">
+          데이터 입력하기
+        </v-stepper-step>
+        <v-divider></v-divider>
+        <v-stepper-step id="second" :complete="e1 > 2" step="2">
+          스키마 선택하기
+        </v-stepper-step>
+        <v-divider></v-divider>
+        <v-stepper-step id="third" :complete="e1 > 3" step="3">
+          데이터 입력하기
+        </v-stepper-step>
+        <v-stepper-step id="fourth" :complete="e1 > 4" step="4">
+          코드 생성 및 다운로드
+        </v-stepper-step>
+      </v-stepper-header>
+      <v-stepper-items>
+        <v-stepper-content step="1">
+          <v-card class="mb-12" height="400px">
+            <v-textarea v-model="srcData" id="srcData" placeholder="여기에 JSON 데이터를 입력하세요."></v-textarea>
+            <v-content v-if="firstStepError"><p>{{firstStepError}}</p></v-content>
+            <v-btn raised elevation="2" primary @click="loadJson()">Continue</v-btn>
+          </v-card>
+        </v-stepper-content>
+        <v-stepper-content step="2">
+          <v-container height="450px" fluid>
+            <v-row>
+              <v-col cols="6">
+                <v-card-subtitle class="pa-2">
+                  Select schema class
+                </v-card-subtitle>
+                <v-virtual-scroll height="300" item-height="42"
+                                  :items="$sdo.sdoClasses">
+                  <template v-slot="{ item }">
+                    <v-list-item :key="item.name"
+                                 @click="getSchemaInfo(item.value)"
+                                 v-bind:class="selectedSchema === item.value ? 'selected': ''">
+                      <v-list-item-content>
+                        <v-list-item-title>
+                          {{item.name}}
+                        </v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </template>
+                </v-virtual-scroll>
+              </v-col>
+              <v-col cols="6" >
+                  <vue-json-pretty id="jsonObj" :data="srcObject" :deep="4"></vue-json-pretty>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <v-card v-if="selected" class="pa-4">
                   <p>이름: <span>{{selected.getName()}}</span></p>
                   <p>IRI: <a :target="selected.getName()" :href="selected.getIRI()">{{selected.getIRI()}}</a></p>
-                </div>
-                <!--                <md-field>-->
-                <!--                  <label>Select Schema Class</label>-->
-                <!--                  <md-select v-model="selectedClass" id="selectedClass1" name="selClass">-->
-                <!--                    <md-option v-for="cl in sdo.sdoClasses" v-bind:key="cl.name" :value="cl.value">{{cl.name}}</md-option>-->
-                <!--                  </md-select>-->
-                <!--                </md-field>-->
-              </div>
-              <div class="md-layout-item md-scrollbar">
-                <vue-json-pretty :data="srcObject" :deep="4"></vue-json-pretty>
-              </div>
-            </div>
-            <md-button class="md-raised md-primary" @click="setDone('second', 'third')">Continue</md-button>
-          </md-step>
-          <md-step id="third" md-label="데이터 입력하기" :md-done.sync="third">
-            <p>여기서는 데이터를 입력합니다.</p>
-            <md-button class="md-raised md-primary" @click="setDone('third', 'fourth')">Continue</md-button>
-          </md-step>
-          <md-step id="fourth" md-label="코드 생성 및 다운로드" :md-done.sync="fourth">
-            <p>여기서는 데이터를 입력합니다.</p>
-            <md-button class="md-raised " @click="downloadAsFile()">save</md-button>
-            <md-button class="md-raised md-primary" @click="setDone('fourth')">Continue</md-button>
-          </md-step>
-        </md-steppers>
-      </md-card-content>
-    </md-card>
+                  <p v-html="selected.getDescription()"></p>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
+          <v-btn raised color="primary" @click="setDone(2, 3)">Continue</v-btn>
+          <v-btn text>Cancel</v-btn>
+        </v-stepper-content>
+        <v-stepper-content step="3">
+          <v-card class="mb-12" height="450px"></v-card>
+          <v-btn color="primary" @click="setDone(3, 4)">Continue
+          </v-btn>
+          <v-btn text>Cancel</v-btn>
+        </v-stepper-content>
+        <v-stepper-content step="4" >
+          <v-card class="mb-12" height="450px"></v-card>
+          <v-btn raised @click="downloadAsFile()">save</v-btn>
+          <v-btn raised color="primary" @click="setDone(4)">Continue</v-btn>
+        </v-stepper-content>
+      </v-stepper-items>
+    </v-stepper>
   </div>
 </template>
 
@@ -72,6 +90,7 @@ export default {
   },
   data () {
     return {
+      e1: 1,
       first: false,
       second: false,
       third: false,
@@ -95,7 +114,7 @@ export default {
           if (this.srcObject !== null) {
             // console.log(this.srcData)
             console.log(this.srcObject)
-            this.setDone('first', 'second')
+            this.setDone(1, 2)
           } else {
             console.log('catch error!')
             this.firstStepError = 'Source Object is empty!'
@@ -120,15 +139,15 @@ export default {
       this.selected = obj
     },
     setDone (id, index) {
-      console.log('this', this)
-      this[id] = true
+      console.log('set done', id, index)
+      this.e1 = index
       this.secondStepError = null
 
       if (index) {
         this.active = index
       }
       console.log(this.active)
-      if (this.active === 'second') {
+      if (this.e1 === 2) {
         console.log(this.$sdo.sdoClasses)
       }
     },
@@ -141,28 +160,23 @@ export default {
   },
   computed: {
   }
-
 }
 </script>
 
 <style scoped lang="scss">
-  .md-textarea {
+  #srcData {
     height: 250px;
     min-height: 250px;
     max-height: 300px;
   }
 
-  .second .md-layout .md-layout-item {
-    min-height: 100px;
-  }
-
-  .md-scrollbar {
-    max-height: 300px;
-    overflow: auto;
-  }
-
   .selected {
     background-color: antiquewhite;
+  }
+
+  #jsonObj {
+    max-height: 300px;
+    overflow: auto;
   }
 
 </style>
