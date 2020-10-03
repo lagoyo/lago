@@ -1,56 +1,14 @@
 <template>
-  <div class="md-layout">
-    <div class="md-layout-item md-large-size-20 ">
-      <md-subheader>Select schema class</md-subheader>
-    </div>
-    <div class="md-layout-item md-large-size-80 md-layout-nowrap md-centered ">
-      <div v-if="selected">
-        <md-subheader>
-          요약
-        </md-subheader>
-        <div class="summary">
-          <p>이름: <span>{{selected.getName()}}</span></p>
-          <p class="descr">설명: <span v-html="selected.getDescription()"></span></p>
-          <p>IRI: <a :target="selected.getName()" :href="selected.getIRI()">{{selected.getIRI()}}</a></p>
-        </div>
-<!--        <md-subheader>-->
-<!--          상속하는 객체-->
-<!--        </md-subheader>-->
-<!--        <md-list>-->
-<!--          <md-list-item v-for="sc in superClasses" v-bind:key="sc.name">-->
-<!--            <a :target="sc.getName()" :href="sc.getIRI()">{{sc.getName()}}</a> {{sc.getDescription()}}-->
-<!--          </md-list-item>-->
-<!--        </md-list>-->
-        <md-divider></md-divider>
-        <md-tabs ref="memberViewByInheritance" md-elevation="2" md-active-tab="tab-0">
-          <template slot="md-tab" slot-scope="{ tab }">
-            <span class="normal">{{ tab.label }} </span>
-            <i class="badge" :class="tab.data.badge ? 'r-badge':'r-empty'">{{ tab.data.badge }}</i>
-          </template>
-          <md-tab v-for="(sc, index) in superClasses"
-                  :key="index"
-                  :id="sc.id"
-                  :md-label="sc.name"
-                  :md-template-data="{ badge: sc.propsCount, id: sc.id }">
-            <div>
-              <a :target="sc.name" :href="sc.getIRI()">{{sc.getName()}}</a>
-            </div>
-            <md-table v-model="props[sc.name]" :table-header-color="tableHeaderColor">
-              <md-table-row slot="md-table-row" slot-scope="{ item }">
-                <md-table-cell md-label="Name">{{ item.name }}</md-table-cell>
-                <md-table-cell md-label="From">{{ item.from }}</md-table-cell>
-                <md-table-cell md-label="Type" class="type" v-html="item.type"></md-table-cell>
-                <md-table-cell md-label="Description" class="descr" v-html="item.desc"></md-table-cell>
-              </md-table-row>
-            </md-table>
-          </md-tab>
-        </md-tabs>
-      </div>
-      <div v-else>
-        <p>스키마를 선택하세요.</p>
-      </div>
-    </div>
-  </div>
+  <v-container fluid height="450px">
+    <v-row>
+      <v-col>
+        <p>TREE</p>
+      </v-col>
+      <v-col>
+        <p>PROPERTY</p>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -163,57 +121,4 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  .selected {
-    background-color: antiquewhite;
-  }
-  .md-scrollbar {
-    max-height: 400px;
-    overflow: auto;
-  }
-  .summary {
-    padding: 15px;
-    width: auto;
-  }
-  .type {
-    max-width: fit-content;
-  }
-  .descr {
-    max-width: fit-content;
-  }
-  .superclass {
-    .md-tabs {
-      .md-button {
-        text-transform: none !important;
-      }
-      .md-button-content {
-        text-transform: none !important;
-      }
-    }
-  }
-  .badge {
-    width: 19px;
-    height: 19px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    border-radius: 100%;
-    color: #fff;
-    font-size: 10px;
-    font-style: normal;
-    font-weight: 600;
-    letter-spacing: -.05em;
-    font-family: 'Roboto Mono', monospace;
-  }
-  .r-badge {
-    background-color: red;
-  }
-  .r-empty {
-    background-color: darkgreen;
-  }
-  .normal {
-    text-transform: none !important;
-  }
 </style>
