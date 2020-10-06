@@ -3,7 +3,7 @@
     <v-stepper v-model="e1">
       <v-stepper-header>
         <v-stepper-step id="first" :complete="e1 > 1" step="1">
-          데이터 입력하기
+          샘플 데이터 입력하기
         </v-stepper-step>
         <v-divider></v-divider>
         <v-stepper-step id="second" :complete="e1 > 2" step="2">
@@ -11,7 +11,7 @@
         </v-stepper-step>
         <v-divider></v-divider>
         <v-stepper-step id="third" :complete="e1 > 3" step="3">
-          데이터 입력하기
+          스키마 데이터 입력하기
         </v-stepper-step>
         <v-stepper-step id="fourth" :complete="e1 > 4" step="4">
           코드 생성 및 다운로드
@@ -26,26 +26,50 @@
           </v-card>
         </v-stepper-content>
         <v-stepper-content step="2">
-          <v-container height="450px" fluid>
-            <v-row>
-              <v-col cols="6">
-                <v-card-subtitle class="pa-2">
-                  Select schema class
-                </v-card-subtitle>
-                <v-virtual-scroll height="300" item-height="42"
-                                  :items="$sdo.sdoClasses">
-                  <template v-slot="{ item }">
-                    <v-list-item :key="item.name"
-                                 @click="getSchemaInfo(item.value)"
-                                 v-bind:class="selectedSchema === item.value ? 'selected': ''">
-                      <v-list-item-content>
-                        <v-list-item-title>
-                          {{item.name}}
-                        </v-list-item-title>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </template>
-                </v-virtual-scroll>
+          <v-container  class="pa-0" fluid>
+            <v-row class="pa-0">
+              <v-col cols="6" class="pa-0">
+                <v-card
+                  class="mx-auto"
+                  max-width="700"
+                >
+                  <v-sheet class="pa-4 primary lighten-2">
+                    <v-text-field
+                      v-model="search"
+                      label="Search Schema Directory"
+                      dark
+                      flat
+                      solo-inverted
+                      hide-details
+                      clearable
+                      clear-icon="mdi-close-circle-outline"
+                    ></v-text-field>
+                  </v-sheet>
+                  <v-card-text id="treeView">
+                    <v-treeview
+                      :items="sdoNodes"
+                      itemKey="iri"
+                      itemText="name"
+                      :open.sync="openNodes"
+                      :active.sync="activeNodes"
+                      :filter="filterNode"
+                      :search="search"
+                      rounded
+                      v-model="tree"
+                      dense
+                      hoverable
+                      activatable
+                      color="warning">
+                      <template v-slot:prepend="{ item, open, active }">
+                        <v-icon v-if="item.children">
+                          {{active ? 'mdi-folder-star': (open ? 'mdi-folder-open' : 'mdi-folder')}}
+                        </v-icon>
+                        <v-icon v-else>
+                          {{active ? 'mdi-cube-send' : 'mdi-cube'}}</v-icon>
+                      </template>
+                    </v-treeview>
+                  </v-card-text>
+                </v-card>
               </v-col>
               <v-col cols="6" >
                   <vue-json-pretty id="jsonObj" :data="srcObject" :deep="4"></vue-json-pretty>
@@ -53,11 +77,20 @@
             </v-row>
             <v-row>
               <v-col cols="12">
-                <v-card v-if="selected" class="pa-4">
-                  <p>이름: <span>{{selected.getName()}}</span></p>
-                  <p>IRI: <a :target="selected.getName()" :href="selected.getIRI()">{{selected.getIRI()}}</a></p>
-                  <p v-html="selected.getDescription()"></p>
+                <v-card v-if="activeClass">
+                  <v-sheet class="pa-4  lighten-1">
+                    <span class="font-weight-bold">{{activeClass.getName()}}</span>
+                    <a class="pa-2" :target="activeClass.getName()" :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
+                    <span v-html="activeClass.getDescription()"></span>
+<!--                    <v-chip-->
+<!--                      class="ma-2"-->
+<!--                      label-->
+<!--                      v-for="cl of superClasses"-->
+<!--                      :key="cl.getName()"-->
+<!--                    >{{cl.getName()}}</v-chip>-->
+                  </v-sheet>
                 </v-card>
+                <div v-else>위에서 스키마를 선택해주세요.</div>
               </v-col>
             </v-row>
           </v-container>
@@ -103,6 +136,11 @@ export default {
       // 현재 활성화된 스텝 정보
       active: 'first',
       selected: null,
+      // tree view
+      tree: [],
+      openNodes: [],
+      activeNodes: [],
+      search: null,
       selectedSchema: null
     }
   },
@@ -159,6 +197,74 @@ export default {
     }
   },
   computed: {
+    filterNode () {
+      return function (item, search, name) {
+        if (item[name].toLowerCase().indexOf(search.toLowerCase()) > -1) {
+          return true
+        }
+        return false
+      }
+    },
+    sdoNodes: function () {
+      let globalIdx = 0
+      const sdo = this.$sdo.sdo
+      const makeChildren = function (superClass) {
+        const subs = superClass.getSubClasses(false).sort()
+        if (subs.length > 0) {
+          const ret = []
+          for (const sub of subs) {
+            ret.push(newNode(sub, sdo.getClass(sub)))
+          }
+          return ret
+        } else {
+          return undefined
+        }
+      }
+      const newNode = (IRI, sClass) => ({
+        id: globalIdx++,
+        iri: IRI,
+        name: IRI.split(':')[1],
+        props: [],
+        children: makeChildren(sClass)
+      })
+      const addNodeAtRoot = function (node, IRI, sClass) {
+        const ret = newNode(IRI, sClass)
+        node.push(ret)
+        return ret
+      }
+      const treeNodes = []
+      const thing = this.$sdo.sdo.getClass('schema:Thing')
+      const thingNode = addNodeAtRoot(treeNodes, thing.getIRI(true), thing)
+      console.log('full tree', treeNodes, thingNode)
+      return treeNodes
+    },
+    activeClass () {
+      if (this.activeNodes.length > 0) {
+        return this.$sdo.sdo.getClass(this.activeNodes[0])
+      } else {
+        return null
+      }
+    },
+    superClasses () {
+      const active = this.activeClass
+      if (active) {
+        const cls = [active]
+        let cl = active
+        while (cl !== null) {
+          const clCategory = cl.getSuperClasses(false)
+          console.log(clCategory, clCategory.length)
+          if (clCategory.length > 0) {
+            cl = this.$sdo.sdo.getClass(clCategory[0])
+            cls.push(cl)
+          } else {
+            cl = null
+          }
+        }
+        return cls
+      } else {
+        return []
+      }
+    }
   }
 }
 </script>
@@ -175,7 +281,11 @@ export default {
   }
 
   #jsonObj {
-    max-height: 300px;
+    max-height: 280px;
+    overflow: auto;
+  }
+  #treeView {
+    height: 300px;
     overflow: auto;
   }
 
