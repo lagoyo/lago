@@ -33,7 +33,7 @@
                   class="mx-auto"
                   max-width="700"
                 >
-                  <v-sheet class="pa-4 primary lighten-2">
+                  <v-sheet class="pa-2 primary lighten-2">
                     <v-text-field
                       v-model="search"
                       label="Search Schema Directory"
@@ -78,7 +78,7 @@
             <v-row>
               <v-col cols="12">
                 <v-card v-if="activeClass">
-                  <v-sheet class="pa-4  lighten-1">
+                  <v-sheet class="pa-2 lighten-1">
                     <span class="font-weight-bold">{{activeClass.getName()}}</span>
                     <a class="pa-2" :target="activeClass.getName()" :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
                     <span v-html="activeClass.getDescription()"></span>
