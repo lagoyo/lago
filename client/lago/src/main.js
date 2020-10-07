@@ -6,8 +6,9 @@ import App from './App'
 // router setup
 import routes from './routes'
 
-import SDOAdapter from 'schema-org-adapter'
 import vuetify from './plugins/vuetify'
+
+import SDO from './sdo'
 
 // configure router
 const router = new VueRouter({
@@ -18,45 +19,13 @@ Vue.use(VueRouter)
 
 Vue.config.productionTip = false
 
-const shared = {
-  ready: false
-}
-
-async function initSdo () {
-  const sdo = new SDOAdapter()
-  console.log('sdo is', sdo)
-  const urlLatestSDO = await sdo.constructSDOVocabularyURL('latest', 'all-layers')
-  // resolves to "https://raw.githubusercontent.com/schemaorg/schemaorg/master/data/releases/6.0/all-layers.jsonld" if 6.0 is the latest version
-  await sdo.addVocabularies([urlLatestSDO])
-
-  const temp = sdo.getListOfClasses().sort()
-  const sdoClasses = temp.map(function (x) {
-    return {
-      value: x,
-      name: x.split(':')[1]
-    }
-  })
-  return {
-    sdo: sdo,
-    sdoClasses: sdoClasses
-  }
-}
-
-shared.install = function () {
-  console.log('install called')
-  initSdo().then((response) => {
-    console.log('in install', response)
-    shared.sdo = response.sdo
-    shared.sdoClasses = response.sdoClasses
-    shared.ready = true
-    return response
-  })
+SDO.install = function () {
   Object.defineProperty(Vue.prototype, '$sdo', {
-    get () { return shared }
+    get () { return SDO }
   })
 }
 
-Vue.use(shared)
+Vue.use(SDO)
 
 /* eslint-disable no-new */
 new Vue({
