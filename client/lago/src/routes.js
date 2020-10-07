@@ -7,6 +7,7 @@ import SchemaTreeBrowser from './pages/SchemaTree'
 import SchemaContent from './pages/layout/SchemaContent'
 import About from './pages/About'
 import MySchemaList from './pages/MySchemaList'
+import SDO from './sdo'
 
 const routes = [
   {
@@ -21,6 +22,20 @@ const routes = [
       {
         path: 'schema',
         component: SchemaContent,
+        beforeEnter: (to, from, next) => {
+          console.log('to', to, 'from', from, 'this=>', this, 'SDO', SDO)
+          if (SDO.ready === false) {
+            console.log('calling fetch', SDO)
+            SDO.fetch()
+              .then(() => next())
+              .catch((err) => {
+                console.log('before schema', err)
+                next('/dashboard')
+              })
+          } else {
+            next()
+          }
+        },
         children: [
           {
             path: 'gencode',
