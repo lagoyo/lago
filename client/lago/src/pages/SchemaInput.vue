@@ -72,7 +72,7 @@
                 </v-card>
               </v-col>
               <v-col cols="6" >
-                  <vue-json-pretty id="jsonObj" :data="srcObject" :deep="4"></vue-json-pretty>
+                  <vue-json-pretty class="jsonObj" :data="srcObject" :deep="4"></vue-json-pretty>
               </v-col>
             </v-row>
             <v-row>
@@ -82,23 +82,63 @@
                     <span class="font-weight-bold">{{activeClass.getName()}}</span>
                     <a class="pa-2" :target="activeClass.getName()" :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
                     <span v-html="activeClass.getDescription()"></span>
-<!--                    <v-chip-->
-<!--                      class="ma-2"-->
-<!--                      label-->
-<!--                      v-for="cl of superClasses"-->
-<!--                      :key="cl.getName()"-->
-<!--                    >{{cl.getName()}}</v-chip>-->
+<!--                    <v-chip class="ma-2" label v-for="cl of superClasses" :key="cl.getName()">{{cl.getName()}}</v-chip>-->
                   </v-sheet>
                 </v-card>
                 <div v-else>위에서 스키마를 선택해주세요.</div>
               </v-col>
             </v-row>
           </v-container>
-          <v-btn raised color="primary" @click="setDone(2, 3)">Continue</v-btn>
+          <v-btn raised color="primary" :disabled="activeClass === null" @click="setDone(2, 3)">Continue</v-btn>
           <v-btn text>Cancel</v-btn>
         </v-stepper-content>
         <v-stepper-content step="3">
-          <v-card class="mb-12" height="450px"></v-card>
+          <v-card class="mb-12" height="450px">
+            <v-sheet class="pa-2 lighten-1" v-if="activeClass">
+              <span class="font-weight-bold">{{activeClass.getName()}}</span>
+              <a class="pa-2" :target="activeClass.getName()" :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
+              <span v-html="activeClass.getDescription()"></span>
+              <v-chip class="ma-2" label v-for="cl of superClasses" :key="cl.getName()">{{cl.getName()}}</v-chip>
+            </v-sheet>
+            <v-card-text>
+              <v-container class="pa-0" fluid>
+                <v-row class="pa-0" v-if="allProperties">
+                  <v-col cols="4">
+                    <div id="propEdit">
+                      <v-simple-table
+                        fixed-header
+                        height="300px"
+                      >
+                        <template v-slot:default>
+                          <thead>
+                          <tr>
+                            <th class="text-left">Name</th>
+                            <th class="text-left">Type</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                          <tr
+                            v-for="item in allProperties.allProps"
+                            :key="item.name"
+                          >
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.type }}</td>
+                          </tr>
+                          </tbody>
+                        </template>
+                      </v-simple-table>
+                    </div>
+                  </v-col>
+                  <v-col>
+                    <p>SELECT PROP TO EDIT</p>
+                  </v-col>
+                  <v-col cols="4" class="pa-2">
+                    <vue-json-pretty class="jsonObj" :data="srcObject" :deep="4"></vue-json-pretty>
+                  </v-col>
+                </v-row>
+            </v-container>
+            </v-card-text>
+          </v-card>
           <v-btn color="primary" @click="setDone(3, 4)">Continue
           </v-btn>
           <v-btn text>Cancel</v-btn>
@@ -141,7 +181,16 @@ export default {
       openNodes: [],
       activeNodes: [],
       search: null,
-      selectedSchema: null
+      selectedSchema: null,
+      // ## 3
+      headers: [
+        { text: 'Name', align: 'start', sortable: true, value: 'name' },
+        { text: 'From', value: 'from' },
+        { text: 'Type', value: 'type' },
+        { text: 'Value', value: 'data' }
+        // { text: 'Description', value: 'desc', sortable: false }
+      ]
+
     }
   },
   methods: {
@@ -194,6 +243,37 @@ export default {
     },
     downloadAsFile () {
       console.log('func is called!')
+    },
+    getProps (thing) {
+      const name = thing.getName()
+      // console.log('thing get props', name)
+      // const prev = this.props[name]
+      // console.log('prev', prev)
+      // if (prev !== undefined && prev.length > 0) {
+      //   console.log('this properties already retrieved!', prev.length)
+      //   return prev.length
+      // }
+      const ps = thing.getProperties(false).sort()
+      const props = []
+      for (const p of ps) {
+        const name = p.split(':')[1]
+        console.log('prop', p, 'name', name)
+        const prop = this.$sdo.sdo.getProperty(p)
+        const dataTypes = prop.getRanges(false)
+        const strTypes = []
+        for (let j = 0; j < dataTypes.length; j++) {
+          strTypes.push(dataTypes[j].split(':')[1])
+        }
+        props.push({
+          name: name,
+          from: thing.getName(),
+          type: strTypes[0],
+          types: strTypes.join('<br>'),
+          value: {},
+          desc: prop.getDescription()
+        })
+      }
+      return { name, props }
     }
   },
   computed: {
@@ -264,6 +344,19 @@ export default {
       } else {
         return []
       }
+    },
+    allProperties () {
+      const all = {
+        allProps: [],
+        props: {}
+      }
+      const cls = this.superClasses
+      for (const cl of cls) {
+        const { name, props } = this.getProps(cl)
+        all.allProps = all.allProps.concat(props)
+        all.props[name] = props
+      }
+      return all
     }
   }
 }
@@ -280,11 +373,15 @@ export default {
     background-color: antiquewhite;
   }
 
-  #jsonObj {
+  .jsonObj {
     max-height: 280px;
     overflow: auto;
   }
   #treeView {
+    height: 300px;
+    overflow: auto;
+  }
+  #propEdit {
     height: 300px;
     overflow: auto;
   }
