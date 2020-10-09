@@ -11,9 +11,9 @@
           alt="LAGO logo"
           class="shrink mr-2"
           contain
-          lazy-src="assets/lago.png"
+          :src="require('./assets/lago.png')"
           transition="scale-transition"
-          width="200"
+          width="120"
         />
         <span>라고 / LAGO : the data typed as</span>
       </div>
