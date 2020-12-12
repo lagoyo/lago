@@ -22,7 +22,7 @@ function _conv( data_mapping, src_data ) {
 
 
 function convert( src_data ) {
-    let data_mapping = {
+    let data_mapping = {  // @@@ 아래 자동 생성 시작
         "aaa" : {
             "aaa_1" : "source src_1 {{src_1}}",
             "aaa_2" : "source src_2 {{src_2}}",
@@ -30,7 +30,7 @@ function convert( src_data ) {
         "bbb" : "{{src_2}} - {{src_3}}" ,
         "ccc" : "{{src_1}}"
     }
-
+    // @@@ 자동 생성 완료
     return _conv(data_mapping, src_data );
 }
 

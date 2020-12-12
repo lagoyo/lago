@@ -22,10 +22,12 @@
     <script src="https://cdn.jsdelivr.net/gh/semantifyit/schema-org-adapter/dist/schema-org-adapter.min.js"></script>
     <script src="https://unpkg.com/mustache@latest"></script>
     <script src="./mapping.js"></script>
+    <script src="./generateCode.js"></script>
 
 </head>
 <body>
 <script>
+    /*
     let data = {
         src_1 : "소스1",
         src_2 : "소스2",
@@ -33,12 +35,13 @@
         dummy : "아무 데이터"
     }
 
-    /*
+
     var obj = generateCode(data);
     var a = 1;
 
     console.log( obj );
-    */
+*/
+
 
     let test_map =
         {
@@ -49,8 +52,10 @@
             "bbb" : "{{src_2}} - {{src_3}}" ,
             "ccc" : "{{src_1}}"
         };
-    let str = generateSource("js", "DataSet", test_map );
+    let str = generateSource("java", "DataSet", test_map );
     console.log(str);
+
+
 </script>
 </body>
 </html>
