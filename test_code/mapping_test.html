@@ -30,6 +30,9 @@
     /*
     let data = {
         src_1 : "소스1",
+        obj_1 : {
+           src_3: "소스3"
+        },
         src_2 : "소스2",
         src_3 : "소스3",
         dummy : "아무 데이터"
@@ -48,6 +51,7 @@
             "aaa" : {
                 "aaa_1" : "source src_1 {{src_1}}",
                 "aaa_2" : "source src_2 {{src_2}}",
+                "aaa_3" : "source src_2 {{obj_1.src_3}}"
             },
             "bbb" : "{{src_2}} - {{src_3}}" ,
             "ccc" : "{{src_1}}"
