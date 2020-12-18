@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="dashboardWrapper">
     <v-card class="pt-4">
       <v-card-title>
         <h4 class="title">대시 보드에 넣을 것</h4>
@@ -29,6 +29,9 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 
+.dashboardWrapper {
+  padding-bottom: 150px;
+}
 </style>

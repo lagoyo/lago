@@ -31,7 +31,11 @@ export default {}
 </script>
 <style scoped lang="scss">
   .footer {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
     padding: 15px 0;
+    height: 150px;
     .container {
       padding-right: 30px;
       padding-left: 30px;

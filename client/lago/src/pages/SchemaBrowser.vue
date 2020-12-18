@@ -1,72 +1,74 @@
 <template>
-  <v-container  height="450px" fluid>
-    <v-row>
-      <v-col cols="3">
-        <v-card class="pa-4">
-          <v-card-title>
-            Select schema class
-          </v-card-title>
-          <v-virtual-scroll height="450" item-height="42"
-                            :items="sdoClasses">
-            <template v-slot="{ item }">
-              <v-list-item :key="item.name"
-                           @click="getSchemaInfo(item.value)"
-                           v-bind:class="selectedSchema === item.value ? 'selected': ''">
-                <v-list-item-content>
-                  <v-list-item-title>
-                    {{item.name}}
-                  </v-list-item-title>
-                </v-list-item-content>
-              </v-list-item>
-            </template>
-          </v-virtual-scroll>
-        </v-card>
-      </v-col>
-      <v-col cols="9">
-        <div id="schemaView" v-if="selected">
-          <v-subheader>
-            요약
-          </v-subheader>
-          <div class="summary">
-            <p>이름: <span>{{selected.getName()}}</span></p>
-            <p class="descr">설명: <span v-html="selected.getDescription()"></span></p>
-            <p>IRI: <a :target="selected.getName()" :href="selected.getIRI()">{{selected.getIRI()}}</a></p>
+  <div class="schemaBrowserWrapper">
+    <v-container fluid>
+      <v-row>
+        <v-col cols="3">
+          <v-card class="pa-4">
+            <v-card-title>
+              Select schema class
+            </v-card-title>
+            <v-virtual-scroll height="450" item-height="42"
+                              :items="sdoClasses">
+              <template v-slot="{ item }">
+                <v-list-item :key="item.name"
+                            @click="getSchemaInfo(item.value)"
+                            v-bind:class="selectedSchema === item.value ? 'selected': ''">
+                  <v-list-item-content>
+                    <v-list-item-title>
+                      {{item.name}}
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
+            </v-virtual-scroll>
+          </v-card>
+        </v-col>
+        <v-col cols="9">
+          <div id="schemaView" v-if="selected">
+            <v-subheader>
+              요약
+            </v-subheader>
+            <div class="summary">
+              <p>이름: <span>{{selected.getName()}}</span></p>
+              <p class="descr">설명: <span v-html="selected.getDescription()"></span></p>
+              <p>IRI: <a :target="selected.getName()" :href="selected.getIRI()">{{selected.getIRI()}}</a></p>
+            </div>
+            <v-divider></v-divider>
+            <v-tabs v-model="activeTab"
+                    elevation="2">
+              <v-tab v-for="sc in superClasses"
+                    :key="sc.id" exact>
+                {{sc.name}} <v-badge inline tile offset-y="10"
+              >{{sc.propsCount}}</v-badge>
+              </v-tab>
+              <v-tab-item v-for="sc of superClasses"
+                          :key="sc.id">
+                <div>
+                  <a :target="sc.name" :href="sc.getIRI()">{{sc.getName()}}</a>
+                </div>
+                <v-data-table
+                  :headers="headers"
+                  :items="props[sc.name]"
+                  :items-per-page="200"
+                  class="elevation-1"
+                >
+                  <template v-slot:item.type="{ item }">
+                    <p v-html="item.type"/>
+                  </template>
+                  <template v-slot:item.desc="{ item }">
+                    <p v-html="item.desc"/>
+                  </template>
+                </v-data-table>
+              </v-tab-item>
+            </v-tabs>
           </div>
-          <v-divider></v-divider>
-          <v-tabs v-model="activeTab"
-                   elevation="2">
-            <v-tab v-for="sc in superClasses"
-                   :key="sc.id" exact>
-              {{sc.name}} <v-badge inline tile offset-y="10"
-            >{{sc.propsCount}}</v-badge>
-            </v-tab>
-            <v-tab-item v-for="sc of superClasses"
-                        :key="sc.id">
-              <div>
-                <a :target="sc.name" :href="sc.getIRI()">{{sc.getName()}}</a>
-              </div>
-              <v-data-table
-                :headers="headers"
-                :items="props[sc.name]"
-                :items-per-page="200"
-                class="elevation-1"
-              >
-                <template v-slot:item.type="{ item }">
-                  <p v-html="item.type"/>
-                </template>
-                <template v-slot:item.desc="{ item }">
-                  <p v-html="item.desc"/>
-                </template>
-              </v-data-table>
-            </v-tab-item>
-          </v-tabs>
-        </div>
-        <div v-else>
-          <p>스키마를 선택하세요.</p>
-        </div>
-      </v-col>
-    </v-row>
-  </v-container>
+          <div v-else>
+            <p>스키마를 선택하세요.</p>
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
+  </div>
 </template>
 
 <script>
@@ -195,6 +197,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+  .schemaBrowserWrapper {
+    padding-bottom: 150px;
+  }
   .selected {
     background-color: antiquewhite;
   }

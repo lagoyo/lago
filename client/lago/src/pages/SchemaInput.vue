@@ -363,6 +363,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+  .content {
+    padding-bottom: 150px;
+  }
   #srcData {
     height: 250px;
     min-height: 250px;
