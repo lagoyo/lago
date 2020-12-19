@@ -612,9 +612,9 @@ export default {
 
 <style scoped lang="scss">
   #srcData {
-    height: 250px;
-    min-height: 250px;
-    max-height: 300px;
+    height: 500px;
+    min-height: 500px;
+    max-height: 600px;
   }
 
   .selected {
@@ -622,17 +622,17 @@ export default {
   }
 
   .jsonObj {
-    max-height: 280px;
+    max-height: 500px;
     overflow: auto;
   }
 
   #treeView {
-    height: 300px;
+    min-height: 500px;
     overflow: auto;
   }
 
   #propEdit {
-    height: 300px;
+    min-height: 500px;
     overflow: auto;
   }
 
@@ -791,4 +791,7 @@ export default {
     white-space: nowrap;
   }
 
+  .content {
+    min-height: 600px;
+  }
 </style>
