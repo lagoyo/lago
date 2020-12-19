@@ -19,8 +19,8 @@
       </v-stepper-header>
       <v-stepper-items>
         <v-stepper-content step="1">
-          <v-card class="mb-12" height="400px">
-            <v-textarea v-model="srcData" id="srcData"
+          <v-card class="mb-12" min-height="600px" height="600">
+            <v-textarea v-model="srcData" class="srcData" height="500" rows="15"
                         placeholder="여기에 JSON 데이터를 입력하세요.">
               {
               "name": "샘플",
@@ -131,20 +131,23 @@
           <v-btn text>Cancel</v-btn>
         </v-stepper-content>
         <v-stepper-content step="3">
-          <v-card class="mb-12" height="450px">
+          <v-card class="mb-12" min-height="650px">
             <v-sheet class="pa-2 lighten-1" v-if="activeClass">
-              <span class="font-weight-bold">{{activeClass.getName()}}</span>
-              <a class="pa-2" :target="activeClass.getName()"
-                 :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
-              <span v-html="activeClass.getDescription()"></span>
-              <v-chip class="ma-2" label v-for="cl of superClasses"
-                      :key="cl.getName()">{{cl.getName()}}
-              </v-chip>
+              <v-row class="pa-0" fluid>
+                  <span class="font-weight-bold">{{activeClass.getName()}}</span>
+                  <a class="pa-2" :target="activeClass.getName()"
+                     :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
+<!--                  <span v-html="activeClass.getDescription()"></span>-->
+                  <v-checkbox
+                    v-model="jsonSrcSelected.enable"
+                    :label="`원시 데이터 이름을 사용하여 검색 ${jsonSrcSelected.path}`"
+                  ></v-checkbox>
+              </v-row>
             </v-sheet>
             <v-card-text>
               <v-container class="pa-0" fluid>
                 <v-row class="pa-0" v-if="allProperties">
-                  <v-col cols="7">
+                  <v-col cols="8">
                     <div id="propEdit">
                       <v-data-table
                         :headers="headers"
@@ -154,9 +157,10 @@
                         height="600px"
                         hide-default-footer
                         disable-pagination
-                        disable-filtering
                         fixed-header
                         :item-class="itemRowBackground"
+                        :search="inputItemSearch"
+                        :custom-filter="itemFilter"
                         dense>
                         <template v-slot:item.name="{ item }">
                           <div :class="'indent-' + item.depth" class="shrink-el-1">
@@ -169,7 +173,7 @@
                               <span>{{item.name}}</span>
                             </v-tooltip>
                             <span class="mini">/{{item.from}}</span>
-                            <v-tooltip bottom open-on-click
+                            <v-tooltip right open-on-click
                                        color="lime darken-4"
                                        max-width="400" min-width="150">
                               <template v-slot:activator="{on, attrs}">
@@ -195,39 +199,71 @@
                         </template>
                         <template v-slot:item.type="{ item }">
                           <div v-if="isPrimitive(item.type)" class="in-control">
-                            <div class="in-div"
-                                 :class="{have: item.value.length > 0}"
-                            >
-                              <div class="in-slot">
-                                <input v-if="item.type=='Text'" type="text"
-                                       class="in"
-                                       v-model="item.value"/>
-                                <input v-else-if="item.type=='URL'" type="text"
-                                       class="in"
-                                       v-model="item.value"/>
-                                <input v-else-if="item.type=='Number'" type="number"
-                                       class="in"
-                                       v-model="item.value"/>
-                                <input v-else-if="item.type=='Integer'" type="number"
-                                       class="in"
-                                       v-model="item.value"/>
-                                <input v-else-if="item.type=='Date'" type="date"
-                                       class="in"
-                                       v-model="item.value"/>
-                                <input v-else-if="item.type=='DateTime'"
-                                       type="datetime-local"
-                                       class="in"
-                                       v-model="item.value"/>
-                                <input v-else-if="item.type=='Boolean'" type="checkbox"
-                                       class="in"
-                                       v-model="item.value"/>
+                            <div v-if="item.editing">
+                              <div class="in-div"
+                                   :class="{have: item.value.length > 0}">
+                                <div class="in-slot">
+                                  <input v-if="item.type=='Text'" type="text"
+                                         class="in"
+                                         v-model="item.value"/>
+                                  <input v-else-if="item.type=='URL'" type="text"
+                                         class="in"
+                                         v-model="item.value"/>
+                                  <input v-else-if="item.type=='Number'" type="number"
+                                         class="in"
+                                         v-model="item.value"/>
+                                  <input v-else-if="item.type=='Integer'" type="number"
+                                         class="in"
+                                         v-model="item.value"/>
+                                  <input v-else-if="item.type=='Date'" type="date"
+                                         class="in"
+                                         v-model="item.value"/>
+                                  <input v-else-if="item.type=='DateTime'"
+                                         type="datetime-local"
+                                         class="in"
+                                         v-model="item.value"/>
+                                  <input v-else-if="item.type=='Time'"
+                                         type="time"
+                                         class="in"
+                                         v-model="item.value"/>
+                                  <input v-else-if="item.type=='Boolean'" type="checkbox"
+                                         class="in"
+                                         v-model="item.value"/>
+                                </div>
+                                <v-btn x-small @click="editDonePrimitive(item)">
+                                  <v-icon>mdi-check-all</v-icon></v-btn>
                               </div>
+                            </div>
+                            <div v-else-if="item.link">
+                              <v-row align="left" justify="start">
+                                <v-icon small>mdi-link-variant</v-icon>
+                                <span class="sp">{{item.link}}</span>
+                                <v-btn @click="unuseLink(item)" small
+                                       :disabled="item.link === null">
+                                  <v-icon>mdi-link-variant-off</v-icon></v-btn>
+                                <v-btn @click="editPrimitive(item)" small><v-icon>mdi-pencil</v-icon></v-btn>
+                              </v-row>
+                            </div>
+                            <div v-else-if="item.value.length > 0">
+                              <v-row align="left" justify="start">
+                                <v-icon small >mdi-pencil</v-icon>
+                                <span class="sp">{{item.value}}</span>
+                                <v-btn @click="editPrimitive(item)" small><v-icon>mdi-pencil</v-icon></v-btn>
+                              </v-row>
+                            </div>
+                            <div v-else>
+                              <v-row align="left" justify="start">
+                                <v-btn @click="useLink(item)" small
+                                       :disabled="jsonSrcSelected.path.length === 0"
+                                ><v-icon>mdi-link-variant</v-icon></v-btn>
+                                <v-btn @click="editPrimitive(item)" small><v-icon>mdi-pencil</v-icon></v-btn>
+                              </v-row>
                             </div>
                           </div>
                           <div v-else>
                             <v-btn class="mx-2" right rounded small @click="toggleExpand(item)">
-                              <v-icon dark>
-                                {{item.expanded ? "mdi-chevron-up" : "mdi-chevron-down"}}
+                              <v-icon :color="item.expanded ? 'orange': ''">
+                                {{item.expanded ? "mdi-chevron-up" : "mdi-chevron-right"}}
                               </v-icon>
                             </v-btn>
                           </div>
@@ -236,7 +272,24 @@
                     </div>
                   </v-col>
                   <v-col cols="4" class="pa-2">
-                    <vue-json-pretty class="jsonObj" :data="srcObject" :deep="4"></vue-json-pretty>
+                    <div class="jsonObj">
+                      <vue-json-pretty
+                        v-model="jsonSrcSelected.path"
+                        :data="srcObject"
+                        :path="jsonSelect.path"
+                        :show-double-quotes="jsonSelect.showDoubleQuotes"
+                        :highlight-mouseover-node="jsonSelect.highlightMouseoverNode"
+                        :highlight-selected-node="jsonSelect.highlightSelectedNode"
+                        :show-length="jsonSelect.showLength"
+                        :show-line="jsonSelect.showLine"
+                        :select-on-click-node="jsonSelect.selectOnClickNode"
+                        :collapsed-on-click-brackets="jsonSelect.collapsedOnClickBrackets"
+                        :path-selectable="((path, data) => (path.length > 0))"
+                        :selectable-type="jsonSelect.selectableType"
+                        :show-select-controller="jsonSelect.showSelectController"
+                        @click="printSelected(...arguments, 'CLICK')"
+                      ></vue-json-pretty>
+                    </div>
                   </v-col>
                 </v-row>
               </v-container>
@@ -253,6 +306,24 @@
         </v-stepper-content>
       </v-stepper-items>
     </v-stepper>
+    <v-snackbar
+      v-model="snack.show"
+      multi-line
+    >
+      {{ snack.text }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          color="red"
+          text
+          v-bind="attrs"
+          @click="snack.show = false"
+        >
+          닫기
+        </v-btn>
+      </template>
+    </v-snackbar>
+
   </div>
 </template>
 
@@ -319,6 +390,10 @@ export default {
       // 현재 활성화된 스텝 정보
       active: 'first',
       selected: null,
+      jsonSrcSelected: {
+        path: '',
+        enable: true
+      },
       // tree view
       tree: [],
       openNodes: [],
@@ -327,13 +402,32 @@ export default {
       selectedSchema: null,
       // ## 3
       headers: [
-        { text: 'Name', align: 'start', width: 400, sortable: true, value: 'name', groupable: false },
-        { text: 'Type', value: 'inputType', width: 100, groupable: false },
-        { text: 'Input', value: 'type', groupable: false }
+        { text: 'Name', align: 'start', width: 400, filterable: true, sortable: true, value: 'name', groupable: false },
+        { text: 'Type', value: 'inputType', width: 100, groupable: false, filterable: false },
+        { text: 'Input', value: 'type', groupable: false, filterable: false }
       ],
+      editingItem: null,
       allProperties: {
         allProps: [],
         props: {}
+      },
+      jsonSelect: {
+        value: 'res.error',
+        selectableType: 'single',
+        showSelectController: true,
+        showLength: true,
+        showLine: true,
+        showDoubleQuotes: false,
+        highlightMouseoverNode: true,
+        highlightSelectedNode: true,
+        selectOnClickNode: true,
+        collapsedOnClickBrackets: true,
+        path: '',
+        model: {}
+      },
+      snack: {
+        text: null,
+        show: false
       }
     }
   },
@@ -391,9 +485,6 @@ export default {
     downloadAsFile () {
       console.log('func is called!')
     },
-    getNameSplit (name) {
-      return name.split('.')
-    },
     getNameInfo (name) {
       const arr = name.split('.')
       let ret = ''
@@ -428,22 +519,22 @@ export default {
         const o = {
           name: name,
           from: thing.getName(),
+          desc: prop.getDescription(),
           inputType: strTypes[0],
+          // 입력 컨트롤
           type: strTypes[0],
           typeName: dataTypes[0],
           types: strTypes.join('<br>'),
           typeNames: dataTypes,
-          subProps: null,
-          subExpanded: [],
+          // 데이터 입력
+          editing: false,
           value: '',
           link: null,
-          desc: prop.getDescription(),
+          // 자식노드 관련
           primitive: primitive, // 기본값인가 여부
           expansible: !primitive, // 펼칠 수 있는가 여부
           expanded: false, // 펼쳐저 있는가 여부
-          parentNode: null, // 부모노드 하나에 대한 포인터
-          childrenNodes: null, // 클릭을 하게 되면 펼처질 자식 노드들의 시작과 끝
-          visible: true,
+          subProps: null,
           depth: 0,
           _: 0
         }
@@ -452,7 +543,7 @@ export default {
           o.name = parentName + '.' + o.name
           o.depth = depth
         }
-        o.self = o
+        //  o.self = o
         props.push(o)
       }
       return { name, props }
@@ -530,11 +621,66 @@ export default {
       console.log('node', node, idx2)
       node.expanded = true
     },
+    useLink (item) {
+      if (this.jsonSrcSelected.path.length > 1) {
+        item.link = this.jsonSrcSelected.path.substring(1)
+      } else {
+        this.openSnack('오른쪽 데이터에서 데이터 객체를 컬럼을 선택하세요.')
+      }
+    },
+    unuseLink (item) {
+      item.link = null
+    },
+    editPrimitive (item) {
+      if (this.editingItem !== null) {
+        this.editingItem.editing = false
+      }
+      this.editingItem = item
+      item.editing = true
+    },
+    editDonePrimitive (item) {
+      if (this.editingItem !== null) {
+        this.editingItem.editing = false
+        this.editingItem = null
+      }
+      item.link = null
+      item.editing = false
+    },
     isPrimitive (type) {
       return type in primitiveTypes
     },
     itemRowBackground (item) {
       return 'indent-bg-' + item.depth
+    },
+    itemFilter (value, search, item) {
+      console.log('filter', value, search, item)
+      if (search.length === 0) { return true }
+      const paths = search.substring(1).split('.')
+      for (const p of paths) {
+        let pp = p.split('[')[0]
+        pp = pp.toLocaleString()
+        if (item.name.indexOf(pp) > -1) {
+          console.log('match name', item.name, pp, p)
+          return true
+        }
+        if (item.types.toLocaleString().indexOf(pp) > -1) {
+          return true
+        }
+      }
+      return false
+    },
+    printSelected (path, data, treeName = '') {
+      console.log('click: ', path, data, treeName)
+      const paths = path.split('.')
+      this.jsonSrcSelected = {
+        path: path,
+        name: paths[paths.length - 1],
+        value: data
+      }
+    },
+    openSnack (msg) {
+      this.snack.text = msg
+      this.snack.show = true
     }
   },
   computed: {
@@ -605,13 +751,18 @@ export default {
       } else {
         return []
       }
+    },
+    inputItemSearch () {
+      return this.jsonSrcSelected.enable ? this.jsonSrcSelected.path : ''
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
-  #srcData {
+  @import '~vue-json-pretty/lib/styles.css';
+
+  .srcData {
     height: 500px;
     min-height: 500px;
     max-height: 600px;
@@ -622,12 +773,15 @@ export default {
   }
 
   .jsonObj {
+    padding-left: 0px;
+    height: 500px;
     max-height: 500px;
-    overflow: auto;
+    overflow-y: auto;
+    overflow-x: scroll;
   }
 
   #treeView {
-    min-height: 500px;
+    height: 500px;
     overflow: auto;
   }
 
@@ -722,9 +876,9 @@ export default {
         input[type=text] {
           flex: 1 1 auto;
           line-height: 16px;
-          max-width: 100%;
+          max-width: 70%;
           min-width: 0px;
-          width: 100%;
+          width: 70%;
           cursor: text;
         }
       }
@@ -793,5 +947,20 @@ export default {
 
   .content {
     min-height: 600px;
+  }
+
+  .lower {
+    text-transform: none !important;
+    text-align: left !important;
+    font-weight: normal !important;
+    display: block;
+    width: 60%;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .sp {
+    margin-left: 5px;
+    margin-right: 5px;
   }
 </style>

@@ -12,7 +12,7 @@
     "schema-org-adapter": "^3.1.0",
     "vue": "^2.6.12",
     "vue-clickaway": "^2.2.2",
-    "vue-json-pretty": "^1.6.7",
+    "vue-json-pretty": "^1.7.1",
     "vuetify": "^2.2.11"
   },
   "devDependencies": {
