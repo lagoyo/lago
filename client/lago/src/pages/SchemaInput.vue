@@ -20,7 +20,8 @@
       <v-stepper-items>
         <v-stepper-content step="1">
           <v-card class="mb-12" height="400px">
-            <v-textarea v-model="srcData" id="srcData" placeholder="여기에 JSON 데이터를 입력하세요.">
+            <v-textarea v-model="srcData" id="srcData"
+                        placeholder="여기에 JSON 데이터를 입력하세요.">
               {
               "name": "샘플",
               "desc": "설명",
@@ -94,7 +95,8 @@
                       color="warning">
                       <template v-slot:prepend="{ item, open, active }">
                         <v-icon v-if="item.children">
-                          {{active ? 'mdi-folder-star': (open ? 'mdi-folder-open' : 'mdi-folder')}}
+                          {{active ? 'mdi-folder-star':
+                          (open ? 'mdi-folder-open' : 'mdi-folder')}}
                         </v-icon>
                         <v-icon v-else>
                           {{active ? 'mdi-cube-send' : 'mdi-cube'}}
@@ -105,7 +107,8 @@
                 </v-card>
               </v-col>
               <v-col cols="6">
-                <vue-json-pretty class="jsonObj" :data="srcObject" :deep="4"></vue-json-pretty>
+                <vue-json-pretty class="jsonObj" :data="srcObject"
+                                 :deep="4"></vue-json-pretty>
               </v-col>
             </v-row>
             <v-row>
@@ -113,7 +116,8 @@
                 <v-card v-if="activeClass">
                   <v-sheet class="pa-2 lighten-1">
                     <span class="font-weight-bold">{{activeClass.getName()}}</span>
-                    <a class="pa-2" :target="activeClass.getName()" :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
+                    <a class="pa-2" :target="activeClass.getName()"
+                       :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
                     <span v-html="activeClass.getDescription()"></span>
                   </v-sheet>
                 </v-card>
@@ -121,7 +125,9 @@
               </v-col>
             </v-row>
           </v-container>
-          <v-btn raised color="primary" :disabled="activeClass === null" @click="setDone(2, 3)">Continue</v-btn>
+          <v-btn raised color="primary" :disabled="activeClass === null"
+                 @click="setDone(2, 3)">Continue
+          </v-btn>
           <v-btn text>Cancel</v-btn>
         </v-stepper-content>
         <v-stepper-content step="3">
@@ -131,7 +137,9 @@
               <a class="pa-2" :target="activeClass.getName()"
                  :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
               <span v-html="activeClass.getDescription()"></span>
-              <v-chip class="ma-2" label v-for="cl of superClasses" :key="cl.getName()">{{cl.getName()}}</v-chip>
+              <v-chip class="ma-2" label v-for="cl of superClasses"
+                      :key="cl.getName()">{{cl.getName()}}
+              </v-chip>
             </v-sheet>
             <v-card-text>
               <v-container class="pa-0" fluid>
@@ -147,22 +155,30 @@
                         hide-default-footer
                         disable-pagination
                         disable-filtering
+                        fixed-header
                         :item-class="itemRowBackground"
                         dense>
                         <template v-slot:item.name="{ item }">
                           <div :class="'indent-' + item.depth" class="shrink-el-1">
-                            <v-tooltip bottom eager>
+                            <v-tooltip bottom>
                               <template v-slot:activator="{ on, attrs }">
                                 <span v-bind="attrs" v-on="on">
                                   {{getNameInfo(item.name).show}}
                                 </span>
                               </template>
-                              <div>
-                                <div>{{item.name}}</div><br/>
-                                <div v-html="item.desc"></div>
-                              </div>
+                              <span>{{item.name}}</span>
                             </v-tooltip>
                             <span class="mini">/{{item.from}}</span>
+                            <v-tooltip bottom open-on-click
+                                       color="lime darken-4"
+                                       max-width="400" min-width="150">
+                              <template v-slot:activator="{on, attrs}">
+                                <span v-bind="attrs" v-on="on"
+                                      class="mini" style="padding-left: 5px">
+                                  <v-icon>info</v-icon></span>
+                              </template>
+                              <span v-html="item.desc"></span>
+                            </v-tooltip>
                           </div>
                         </template>
                         <template v-slot:item.inputType="{ item }">
@@ -177,40 +193,41 @@
                             </v-tooltip>
                           </div>
                         </template>
-                        <template v-slot:item.self="{ item }">
-                          <div v-if="isPrimitive(item.self.type)" class="in-control">
+                        <template v-slot:item.type="{ item }">
+                          <div v-if="isPrimitive(item.type)" class="in-control">
                             <div class="in-div"
-                                 :class="{have: item.self.value.length > 0}"
+                                 :class="{have: item.value.length > 0}"
                             >
                               <div class="in-slot">
-                                <input v-if="item.self.type=='Text'" type="text"
-                                       class="in"
-                                       v-model="item.self.value"/>
-                                <input v-else-if="item.self.type=='URL'" type="text"
+                                <input v-if="item.type=='Text'" type="text"
                                        class="in"
                                        v-model="item.value"/>
-                                <input v-else-if="item.self.type=='Number'" type="number"
+                                <input v-else-if="item.type=='URL'" type="text"
                                        class="in"
                                        v-model="item.value"/>
-                                <input v-else-if="item.self.type=='Integer'" type="number"
+                                <input v-else-if="item.type=='Number'" type="number"
                                        class="in"
-                                       v-model="item.self.value"/>
-                                <input v-else-if="item.self.type=='Date'" type="date"
+                                       v-model="item.value"/>
+                                <input v-else-if="item.type=='Integer'" type="number"
                                        class="in"
-                                       v-model="item.self.value"/>
-                                <input v-else-if="item.self.type=='DateTime'" type="datetime-local"
+                                       v-model="item.value"/>
+                                <input v-else-if="item.type=='Date'" type="date"
                                        class="in"
-                                       v-model="item.self.value"/>
-                                <input v-else-if="item.self.type=='Boolean'" type="checkbox"
+                                       v-model="item.value"/>
+                                <input v-else-if="item.type=='DateTime'"
+                                       type="datetime-local"
                                        class="in"
-                                       v-model="item.self.value"/>
+                                       v-model="item.value"/>
+                                <input v-else-if="item.type=='Boolean'" type="checkbox"
+                                       class="in"
+                                       v-model="item.value"/>
                               </div>
                             </div>
                           </div>
                           <div v-else>
-                            <v-btn class="mx-2" right rounded small @click="toggleExpand(item.self)">
+                            <v-btn class="mx-2" right rounded small @click="toggleExpand(item)">
                               <v-icon dark>
-                                {{item.self.expanded ? "mdi-chevron-up" : "mdi-chevron-down"}}
+                                {{item.expanded ? "mdi-chevron-up" : "mdi-chevron-down"}}
                               </v-icon>
                             </v-btn>
                           </div>
@@ -312,7 +329,7 @@ export default {
       headers: [
         { text: 'Name', align: 'start', width: 400, sortable: true, value: 'name', groupable: false },
         { text: 'Type', value: 'inputType', width: 100, groupable: false },
-        { text: 'Input', value: 'self', groupable: false }
+        { text: 'Input', value: 'type', groupable: false }
       ],
       allProperties: {
         allProps: [],
@@ -459,13 +476,15 @@ export default {
     },
     getAllSubNodeCount (node) {
       let ret = 0
-      if (node.subProps !== null) {
+      if (node.subProps !== null && node.expanded) {
         ret = node.subProps.length
         for (const sub of node.subProps) {
           if (!sub.primitive) {
             ret += this.getAllSubNodeCount(sub)
           }
         }
+        // 열린 모든 서브 노드는 모조리 닫는다.
+        node.expanded = false
       }
       return ret
     },
@@ -489,6 +508,8 @@ export default {
       }
       node.subProps = temp
     },
+    // 열기, 닫기를 반복하면, 중간에 더 열린 노드들이 모두 다 함께 열려야 하는데
+    // 현재로서는 컨트롤이 쉽지 않아서 모든 서브들을 다 닫도록 한다.
     collapse (node) {
       if (node.subProps === null) {
         return
@@ -709,62 +730,65 @@ export default {
       }
     }
   }
+
   .indent-0 {
     padding-left: 0px;
   }
+
   .indent-1 {
-    padding-left: 10px;
-    color: #1A237E;
+    padding-left: 5px;
   }
+
   .indent-2 {
-    padding-left: 20px;
-    color: #283593;
+    padding-left: 10px;
   }
+
   .indent-3 {
-    padding-left: 30px;
-    color: #303F9F;
+    padding-left: 15px;
   }
+
   .indent-4 {
-    padding-left: 40px;
-    color: #0D47A1;
+    padding-left: 20px;
   }
+
   .indent-5 {
-    padding-left: 50px;
-    color: #311B92;
+    padding-left: 25px;
   }
+
   .indent-6 {
-    padding-left: 60px;
-    color: #4527A0;
+    padding-left: 30px;
   }
+
   .indent-7 {
-    padding-left: 70px;
-    color: #512DA8
+    padding-left: 35px;
   }
+
   .indent-8 {
-    padding-left: 80px;
-    color: #4A148C;
+    padding-left: 40px;
   }
+
   .indent-9 {
-    padding-left: 90px;
-    color: #004D40;
+    padding-left: 45px;
   }
 
   .mini {
     font-size: 8px;
     font-color: grey;
   }
+
   .shrink-el {
-    width:90px;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+    width: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
+
   .shrink-el-1 {
     display: block;
-    width:380px;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+    width: 380px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
 </style>
