@@ -21,7 +21,7 @@
         <v-stepper-content step="1">
           <v-card class="mb-12">
             <v-textarea v-model="srcData" rows="15" id="srcData" height="100%"
-            :style="getHeight('srcData', 0.6)" class="mb-10"
+            :style="getStaticHeight('srcData', 350, maxHeight=350)" class="mb-10"
             placeholder="여기에 JSON 데이터를 입력하세요.">
               {
               "name": "샘플",
@@ -60,8 +60,7 @@
           </v-card>
         </v-stepper-content>
         <v-stepper-content step="2">
-          <v-container class="pa-0" fluid  id="schemaInputWrapper"
-          :style="getStaticHeight('schemaInputWrapper', 300)">
+          <v-container class="pa-0" fluid >
             <v-row class="pa-0">
               <v-col cols="6" class="pa-0">
                 <v-card
@@ -81,7 +80,7 @@
                     ></v-text-field>
                   </v-sheet>
                   <v-card-text id="treeView"
-                  :style="getStaticHeight('treeView', 440, 440)">
+                  :style="getStaticHeight('treeView', 480 + getSchemaDescHeight(), 480 + getSchemaDescHeight())">
                     <v-treeview
                       :items="sdoNodes"
                       itemKey="iri"
@@ -95,6 +94,7 @@
                       dense
                       hoverable
                       activatable
+                      @update:active="setStaticHeight('treeView', 500, maxHeight=500)"
                       color="warning">
                       <template v-slot:prepend="{ item, open, active }">
                         <v-icon v-if="item.children">
@@ -112,12 +112,12 @@
               <v-col cols="6" >
                 <vue-json-pretty class="jsonObj" :data="srcObject"
                 id="schemdaInputJsonObj"
-              :style="getStaticHeight('schemdaInputJsonObj', 390)"
+                :style="getStaticHeight('schemdaInputJsonObj', 430 + getSchemaDescHeight(), 430 + getSchemaDescHeight())"
                                  :deep="4"></vue-json-pretty>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="12">
+              <v-col cols="12" ref="shcemaInputDesc">
                 <v-card v-if="activeClass">
                   <v-sheet class="pa-2 lighten-1">
                     <span class="font-weight-bold">{{activeClass.getName()}}</span>
@@ -128,12 +128,14 @@
                 </v-card>
                 <div v-else>위에서 스키마를 선택해주세요.</div>
               </v-col>
+              <v-col>
+                <v-btn raised color="primary" :disabled="activeClass === null"
+                 @click="setDone(2, 3)">Continue
+                </v-btn>
+                <v-btn text>Cancel</v-btn>
+              </v-col>
             </v-row>
           </v-container>
-          <v-btn raised color="primary" :disabled="activeClass === null"
-                 @click="setDone(2, 3)">Continue
-          </v-btn>
-          <v-btn text>Cancel</v-btn>
         </v-stepper-content>
         <v-stepper-content step="3">
           <v-card class="mb-12" min-height="650px" height="75vh">
@@ -174,7 +176,8 @@
               <v-container class="pa-0" fluid>
                 <v-row class="pa-0" v-if="allProperties">
                   <v-col cols="8">
-                    <div id="propEdit">
+                    <div id="propEdit"
+                    :style="getStaticHeight('propEdit', 450, maxHeight=450)">
                       <v-data-table
                         :headers="headers"
                         :items="allProperties.allProps"
@@ -187,7 +190,8 @@
                         :item-class="itemRowBackground"
                         :search="inputItemSearch"
                         :custom-filter="itemFilter"
-                        dense>
+                        dense
+                        >
                         <template v-slot:item.name="{ item }">
                           <div :class="'indent-' + item.depth" class="shrink-el-1">
                             <v-tooltip bottom>
@@ -294,8 +298,9 @@
                       </v-data-table>
                     </div>
                   </v-col>
-                  <v-col cols="4" class="pa-2">
-                    <div class="jsonObj elevation-2 pa-2">
+                  <v-col cols="4" class="pa-2" >
+                    <div class="jsonObj elevation-2 pa-2" id="propDetailList"
+                  :style="getStaticHeight('propDetailList', 420, maxHeight=420)">
                       <vue-json-pretty
                         v-model="jsonSrcSelected.path"
                         :data="srcObject"
@@ -389,7 +394,7 @@
 
 <script>
 import VueJsonPretty from 'vue-json-pretty'
-import gen from '../lago-gen'
+// import gen from '../lago-gen'
 const primitiveTypes = {
   Integer: undefined,
   Text: undefined,
@@ -770,17 +775,17 @@ export default {
         '@type': active.getName()
       }
 
-      const putValue = (dest, obj) => {
-        if (obj.value.length > 0) {
-          if (obj.inputType === 'Number') {
-            dest[obj.nam] = Number.parseInt(obj.value)
-          } else {
-            dest[obj.nam] = obj.value
-          }
-        } else {
-          dest[obj.nam] = '{{' + obj.link + '}}'
-        }
-      }
+      // const putValue = (dest, obj) => {
+      //   if (obj.value.length > 0) {
+      //     if (obj.inputType === 'Number') {
+      //       dest[obj.nam] = Number.parseInt(obj.value)
+      //     } else {
+      //       dest[obj.nam] = obj.value
+      //     }
+      //   } else {
+      //     dest[obj.nam] = '{{' + obj.link + '}}'
+      //   }
+      // }
       this.template = temp
     },
     setHeight (elementId, divisionRate) {
@@ -797,15 +802,30 @@ export default {
         // console.log('onLoad () ' + elementId + ' is null')
       }
     },
-    setStaticHeight (elementId, subVal) {
+    setStaticHeight (elementId, subVal, maxHeight = false, overflow = false) {
       const windowHeight = this.windowHeight
-      // console.log('onLoad () window height ', windowHeight)
-      // console.log('onLoad () return ', windowHeight - subVal)
+      // console.log('window height ', windowHeight)
+      // console.log('return ', windowHeight - subVal)
+
+      // console.log('return obj ', { height: windowHeight - subVal + 'px' })
       var elem = document.getElementById(elementId)
+      var styleString = ''
+
       if (elem != null) {
-        // console.log(elem)
-        elem.style = 'height: ' + windowHeight - subVal + 'px'
-        // console.log('set ' + elementId)
+        console.log(elem)
+
+        if (maxHeight !== false) {
+          styleString += 'height: ' + String(windowHeight - subVal) + 'px;'
+          styleString += 'max-height: ' + String(windowHeight - subVal) + 'px;'
+        } else {
+          styleString += 'height: ' + String(windowHeight - subVal) + 'px;'
+        }
+        if (overflow !== false) {
+          styleString += 'overflow: auto;'
+        } else {
+        }
+        elem.style = styleString
+        // console.log('set ' + elementId + '=' + styleString)
       } else {
         // console.log(elementId + ' is null')
       }
@@ -827,6 +847,16 @@ export default {
 
       return { height: windowHeight * divisionRate + 'px' }
     },
+    getSchemaDescHeight () {
+      const propDOM = this.$refs.shcemaInputDesc
+      if (propDOM != null) {
+        console.log('getSchemaDescHeight is ' + propDOM.clientHeight)
+        return propDOM.clientHeight
+      } else {
+        console.log('getSchemaDescHeight is None')
+        return 0
+      }
+    },
     getStaticHeight (elementId, subVal, maxHeight = false, overflow = false) {
       const windowHeight = this.windowHeight
       // console.log('window height ', windowHeight)
@@ -841,13 +871,13 @@ export default {
         console.log(elem)
 
         if (maxHeight !== false) {
-          styleString += 'height: ' + windowHeight - subVal + 'px;'
-          styleString += 'max-height: ' + windowHeight - subVal + 'px;'
-          styleObj.height = windowHeight - subVal + 'px'
-          styleObj.maxHeight = windowHeight - subVal + 'px'
+          styleString += 'height: ' + String(windowHeight - subVal) + 'px;'
+          styleString += 'max-height: ' + String(windowHeight) - subVal + 'px;'
+          styleObj.height = String(windowHeight) - subVal + 'px'
+          styleObj.maxHeight = String(windowHeight) - subVal + 'px'
         } else {
-          styleString += 'height: ' + windowHeight - subVal + 'px;'
-          styleObj.height = windowHeight - subVal + 'px'
+          styleString += 'height: ' + String(windowHeight - subVal) + 'px;'
+          styleObj.height = String(windowHeight - subVal) + 'px'
         }
         if (overflow !== false) {
           styleString += 'overflow: auto;'
@@ -855,7 +885,7 @@ export default {
         } else {
         }
         elem.style = styleString
-        // console.log('set ' + elementId + '=' + styleString)
+        console.log('set ' + elementId + '=' + styleString)
         return styleObj
       } else {
         // console.log(elementId + ' is null')
@@ -865,10 +895,10 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
-      this.setHeight('srcData', 0.6)
+      this.setStaticHeight('srcData', 350, 350)
       this.setStaticHeight('schemaInputWrapper', 300)
-      this.setStaticHeight('treeView', 450)
-      this.setStaticHeight('schemdaInputJsonObj', 400)
+      this.setStaticHeight('treeView', 450, 450)
+      this.setStaticHeight('schemdaInputJsonObj', 550, 550)
       window.addEventListener('resize', this.onResize)
     })
   },

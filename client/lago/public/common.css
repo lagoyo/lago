@@ -1,6 +1,6 @@
-.schemaInputContent{}
-
-
+#schemdaInputJsonObj {
+    height: calc(100vh - 450px) !important;
+}
 .schemaBrowserScroll{
     height: calc(100vh - 350px) !important;
 }
