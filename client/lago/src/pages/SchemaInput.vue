@@ -538,8 +538,8 @@ export default {
       if (this.e1 === 3) {
         this.getAllProperties()
       }
-      if (this.el === 4) {
-        this.makeTemplate()
+      if (this.e1 === 4) {
+        this.template = this.makeTemplate()
       }
     },
     setError () {
@@ -933,7 +933,7 @@ export default {
     background-color: antiquewhite;
   }
   .jsonObj {
-    height: 62vh;
+    height: 40vh;
     overflow-y: auto;
     overflow-x: scroll;
   }
@@ -945,7 +945,7 @@ export default {
 
   #propEdit {
     min-height: 500px;
-    height: 58vh;
+    height: 40vh;
     overflow: auto;
   }
 
