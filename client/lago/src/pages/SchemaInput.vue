@@ -148,13 +148,13 @@
                 </v-row>
                 <v-row no-gutters>
                   <label>전체 편집</label>
-                  <v-chip label class="ma-1" v-bind:="allProperties">
+                  <v-chip label class="ma-1">
                     {{allProperties.edited.size}}</v-chip>
                   <label> 입력 소스와 연결: </label>
-                  <v-chip class="ma-1" label v-bind="linkedItems">{{linkedItems}}</v-chip>
+                  <v-chip class="ma-1" label>{{linkedItems}}</v-chip>
                   <label> 직접 편집: </label>
-                  <v-chip class="ma-1" label v-bind:="editedItems">{{editedItems}}</v-chip>
-
+                  <v-chip class="ma-1" label>{{editedItems}}</v-chip>
+                  <v-btn @click="makeTemplate" >생성</v-btn>
                   <v-col>
                     <v-checkbox :hide-details="true" class="normal-check"
                       dense v-model="jsonSrcSelected.enabled"
@@ -317,15 +317,52 @@
                 </v-row>
               </v-container>
             </v-card-text>
+            <v-card-actions>
+              <v-btn
+                color="primary"
+                :disabled="allProperties.edited.size == 0"
+                @click="setDone(3, 4)">Continue
+              </v-btn>
+              <v-btn text>Cancel</v-btn>
+            </v-card-actions>
           </v-card>
-          <v-btn color="primary" :disabled="allProperties.edited.size == 0" @click="setDone(3, 4)">Continue
-          </v-btn>
-          <v-btn text>Cancel</v-btn>
         </v-stepper-content>
         <v-stepper-content step="4">
-          <v-card class="mb-12" height="450px"></v-card>
-          <v-btn raised @click="downloadAsFile()">save</v-btn>
-          <v-btn raised color="primary" @click="setDone(4)">Continue</v-btn>
+          <v-card class="mb-12" height="650px">
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col cols="4" class="jsonObj elevation-1">
+                    <vue-json-pretty
+                      :data="template"
+                      :deep="4"></vue-json-pretty>
+                  </v-col>
+                  <v-col cols='4' class="jsonObj elevation-0">
+                    <vue-json-pretty class="jsonObj" :data="srcObject"
+                                     :deep="4"></vue-json-pretty>
+                  </v-col>
+                  <v-col cols="4" class="jsonObj elevation-3 overflow-auto">
+                    <pre>
+                      {{generatedSource}}
+                    </pre>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+            <v-card-actions>
+              <v-select
+                v-model="selectedLang"
+                :items="genLanguages"
+                label="Select Language"
+                return-object
+                dense
+                item-value="name"
+              ></v-select>
+              <v-btn raised @click="generateSource()">generate source</v-btn>
+              <v-btn raised @click="downloadAsFile()">save</v-btn>
+              <v-btn raised color="primary" @click="setDone(4)">Continue</v-btn>
+            </v-card-actions>
+          </v-card>
         </v-stepper-content>
       </v-stepper-items>
     </v-stepper>
@@ -352,7 +389,7 @@
 
 <script>
 import VueJsonPretty from 'vue-json-pretty'
-
+import gen from '../lago-gen'
 const primitiveTypes = {
   Integer: undefined,
   Text: undefined,
@@ -377,36 +414,36 @@ export default {
       fourth: false,
       // 사용작 입력한 최초의 입력 데이터
       srcData: '{\n' +
-          '  "name": "샘플",\n' +
-          '  "desc": "설명",\n' +
-          '  "url": "https://baikal.ai/",\n' +
-          '  "contentRating": "",\n' +
-          '  "award": "국어원 코퍼스 1등상",\n' +
-          '  "comment": {},\n' +
-          '  "distribution": {\n' +
-          '    "uploadDate": "2020-12-16T23:04:18Z",\n' +
-          '    "accessMode": "chartOnVisual",\n' +
-          '    "audience": {\n' +
-          '      "audienceType": "veterans"\n' +
-          '    },\n' +
-          '    "author": {\n' +
-          '      "name": "Baikal AI"\n' +
-          '    }\n' +
-          '  },\n' +
-          '  "author": {\n' +
-          '    "name": "Baikal AI",\n' +
-          '    "email": "gih2yun@baikal.ai"\n' +
-          '  },\n' +
-          '  "creator": {\n' +
-          '    "name": "Baikal AI",\n' +
-          '    "email": "gih2yun@baikal.ai"\n' +
-          '  },\n' +
-          '  "dateCreated": "2020-12-16T23:04:18Z",\n' +
-          '  "dateModified": "2020-12-16T23:04:18Z",\n' +
-          '  "datePublished": "2020-12-16T23:04:18Z",\n' +
-          '  "genre": "Korean Language",\n' +
-          '  "typicalAgeRange": "7-21"\n' +
-          '}',
+        '  "name": "샘플",\n' +
+        '  "desc": "설명",\n' +
+        '  "url": "https://baikal.ai/",\n' +
+        '  "contentRating": "",\n' +
+        '  "award": "국어원 코퍼스 1등상",\n' +
+        '  "comment": {},\n' +
+        '  "distribution": {\n' +
+        '    "uploadDate": "2020-12-16T23:04:18Z",\n' +
+        '    "accessMode": "chartOnVisual",\n' +
+        '    "audience": {\n' +
+        '      "audienceType": "veterans"\n' +
+        '    },\n' +
+        '    "author": {\n' +
+        '      "name": "Baikal AI"\n' +
+        '    }\n' +
+        '  },\n' +
+        '  "author": {\n' +
+        '    "name": "Baikal AI",\n' +
+        '    "email": "gih2yun@baikal.ai"\n' +
+        '  },\n' +
+        '  "creator": {\n' +
+        '    "name": "Baikal AI",\n' +
+        '    "email": "gih2yun@baikal.ai"\n' +
+        '  },\n' +
+        '  "dateCreated": "2020-12-16T23:04:18Z",\n' +
+        '  "dateModified": "2020-12-16T23:04:18Z",\n' +
+        '  "datePublished": "2020-12-16T23:04:18Z",\n' +
+        '  "genre": "Korean Language",\n' +
+        '  "typicalAgeRange": "7-21"\n' +
+        '}',
       srcObject: null,
       secondStepError: null,
       firstStepError: null,
@@ -453,7 +490,11 @@ export default {
         text: null,
         show: false
       },
-      windowHeight: window.innerHeight
+      windowHeight: window.innerHeight,
+      template: null,
+      generatedSource: 'function ()\n{\n}\n',
+      genLanguages: ['JavaScript', 'Java'],
+      selectedLang: 'JavaScript'
     }
   },
   methods: {
@@ -506,8 +547,8 @@ export default {
       if (this.e1 === 3) {
         this.getAllProperties()
       }
-      if (this.el === 4) {
-        this.makeTemplate()
+      if (this.e1 === 4) {
+        this.template = this.makeTemplate()
       }
     },
     setError () {
@@ -549,6 +590,7 @@ export default {
         const primitive = strTypes[0] in primitiveTypes
         const o = {
           name: name,
+          nam: name,
           from: thing.getName(),
           desc: prop.getDescription(),
           inputType: strTypes[0],
@@ -722,8 +764,23 @@ export default {
       this.snack.show = true
     },
     makeTemplate () {
-      const temp = {}
+      const active = this.activeClass
+      const temp = {
+        '@context': 'https://schema.org',
+        '@type': active.getName()
+      }
 
+      const putValue = (dest, obj) => {
+        if (obj.value.length > 0) {
+          if (obj.inputType === 'Number') {
+            dest[obj.nam] = Number.parseInt(obj.value)
+          } else {
+            dest[obj.nam] = obj.value
+          }
+        } else {
+          dest[obj.nam] = '{{' + obj.link + '}}'
+        }
+      }
       this.template = temp
     },
     setHeight (elementId, divisionRate) {
@@ -804,6 +861,7 @@ export default {
         // console.log(elementId + ' is null')
       }
     }
+
   },
   mounted () {
     this.$nextTick(() => {
