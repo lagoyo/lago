@@ -1,12 +1,12 @@
 <template>
-  <v-container  height="450px" fluid>
+  <v-container class="schemaBowserScroll" fluid>
     <v-row>
       <v-col cols="3">
-        <v-card class="pa-4">
+        <v-card class="pa-4" height="80vh">
           <v-card-title>
             Select schema class
           </v-card-title>
-          <v-virtual-scroll height="450" item-height="42"
+          <v-virtual-scroll item-height="42" class="schemaBrowserScroll"
                             :items="sdoClasses">
             <template v-slot="{ item }">
               <v-list-item :key="item.name"
@@ -199,7 +199,7 @@ export default {
     background-color: antiquewhite;
   }
   #schemaView {
-    max-height: 500px;
+    height: 80vh;
     overflow: auto;
   }
 </style>

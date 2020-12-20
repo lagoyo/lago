@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <v-card>
+    <v-card class="about">
       <v-card-title >
         <h4 class="title">LAGO project is ...</h4>
       </v-card-title>
@@ -31,5 +31,7 @@ export default {
 </script>
 
 <style scoped>
-
+.about {
+  height: 80vh;
+}
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <v-card>
+    <v-card class="schemaList">
       <v-card-title>
         <h4 class="title">My Schema List</h4>
       </v-card-title>
@@ -26,5 +26,7 @@ export default {
 </script>
 
 <style scoped>
-
+.schemaList {
+  height: 82vh;
+}
 </style>

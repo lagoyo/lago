@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid height="550px">
+  <v-container fluid >
     <v-row>
       <v-col cols="4">
         <v-card
@@ -45,12 +45,12 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col cols="8">
+      <v-col cols="8" height="65hv">
 <!--        <p>Open: {{openNodes}}</p>-->
 <!--        <p>Tree:{{tree}}</p>-->
 <!--        <p>Active: {{activeNodes}}</p>-->
 <!--        <p>Seach: {{search}}</p>-->
-        <v-card v-if="activeClass">
+        <v-card v-if="activeClass" class="schematreeProp">
           <v-sheet class="pa-4 accent lighten-1">
             <span class="font-weight-bold">{{activeClass.getName()}}</span>
             <a class="pa-10" :target="activeClass.getName()" :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
@@ -302,11 +302,11 @@ export default {
 
 <style scoped lang="scss">
   #treeView {
-    height: 500px;
+    height: 73vh;
     overflow: auto;
   }
   #propView {
-    height: 400px;
+    height: 600px;
     overflow: auto;
   }
 </style>
