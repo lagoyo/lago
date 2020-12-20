@@ -19,43 +19,51 @@
       </v-stepper-header>
       <v-stepper-items>
         <v-stepper-content step="1">
-          <v-card class="mb-12" min-height="600px" height="600">
-            <v-textarea v-model="srcData" class="srcData" height="500" rows="15"
-                        placeholder="여기에 JSON 데이터를 입력하세요.">
-              {
-              "name": "샘플",
-              "desc": "설명",
-              "url": "https://baikal.ai/",
-              "contentRating": "",
-              "award": "국어원 코퍼스 1등상",
-              "comment": {},
-              "distribution": {
-              "uploadDate": "2020-12-16T23:04:18Z",
-              "accessMode": "chartOnVisual",
-              "audience": {
-              "audienceType": "veterans"
-              },
-              "author": {
-              "name": "Baikal AI"
-              }
-              },
-              "author": {
-              "name": "Baikal AI",
-              "email": "gih2yun@baikal.ai"
-              },
-              "creator": {
-              "name": "Baikal AI",
-              "email": "gih2yun@baikal.ai"
-              },
-              "dateCreated": "2020-12-16T23:04:18Z",
-              "dateModified": "2020-12-16T23:04:18Z",
-              "datePublished": "2020-12-16T23:04:18Z",
-              "genre": "Korean Language",
-              "typicalAgeRange": "7-21"
-              }
-            </v-textarea>
-            <v-content v-if="firstStepError"><p>{{firstStepError}}</p></v-content>
-            <v-btn raised elevation="2" primary @click="loadJson()">Continue</v-btn>
+          <v-card class="mb-12" min-height="500px" height="560">
+            <v-card-title>
+              <p>아래에 스키마 형식으로 변환할 원본 데이터를 입력하세요.
+                원본 JSON 내용을 복사하면 됩니다.</p>
+            </v-card-title>
+            <v-card-text>
+              <v-textarea v-model="srcData" class="srcData" height="400" full-width rows="15"
+                          placeholder="여기에 JSON 데이터를 입력하세요.">
+                {
+                "name": "샘플",
+                "desc": "설명",
+                "url": "https://baikal.ai/",
+                "contentRating": "",
+                "award": "국어원 코퍼스 1등상",
+                "comment": {},
+                "distribution": {
+                "uploadDate": "2020-12-16T23:04:18Z",
+                "accessMode": "chartOnVisual",
+                "audience": {
+                "audienceType": "veterans"
+                },
+                "author": {
+                "name": "Baikal AI"
+                }
+                },
+                "author": {
+                "name": "Baikal AI",
+                "email": "gih2yun@baikal.ai"
+                },
+                "creator": {
+                "name": "Baikal AI",
+                "email": "gih2yun@baikal.ai"
+                },
+                "dateCreated": "2020-12-16T23:04:18Z",
+                "dateModified": "2020-12-16T23:04:18Z",
+                "datePublished": "2020-12-16T23:04:18Z",
+                "genre": "Korean Language",
+                "typicalAgeRange": "7-21"
+                }
+              </v-textarea>
+            </v-card-text>
+            <v-card-actions>
+              <v-btn raised elevation="1" primary @click="loadJson()">Continue</v-btn>
+              <v-content v-if="firstStepError"><p>{{firstStepError}}</p></v-content>
+            </v-card-actions>
           </v-card>
         </v-stepper-content>
         <v-stepper-content step="2">
@@ -131,7 +139,7 @@
           <v-btn text>Cancel</v-btn>
         </v-stepper-content>
         <v-stepper-content step="3">
-          <v-card class="mb-12" min-height="650px">
+          <v-card class="mb-12" min-height="550px">
             <v-sheet class="lighten-1" v-if="activeClass">
               <v-container fluid>
                 <v-row no-gutters>
@@ -143,13 +151,13 @@
                 </v-row>
                 <v-row no-gutters>
                   <label>전체 편집</label>
-                  <v-chip label class="ma-1" v-bind:="allProperties">
+                  <v-chip label class="ma-1">
                     {{allProperties.edited.size}}</v-chip>
                   <label> 입력 소스와 연결: </label>
-                  <v-chip class="ma-1" label v-bind="linkedItems">{{linkedItems}}</v-chip>
+                  <v-chip class="ma-1" label>{{linkedItems}}</v-chip>
                   <label> 직접 편집: </label>
-                  <v-chip class="ma-1" label v-bind:="editedItems">{{editedItems}}</v-chip>
-
+                  <v-chip class="ma-1" label>{{editedItems}}</v-chip>
+                  <v-btn @click="makeTemplate" >생성</v-btn>
                   <v-col>
                     <v-checkbox :hide-details="true" class="normal-check"
                       dense v-model="jsonSrcSelected.enabled"
@@ -312,15 +320,52 @@
                 </v-row>
               </v-container>
             </v-card-text>
+            <v-card-actions>
+              <v-btn
+                color="primary"
+                :disabled="allProperties.edited.size == 0"
+                @click="setDone(3, 4)">Continue
+              </v-btn>
+              <v-btn text>Cancel</v-btn>
+            </v-card-actions>
           </v-card>
-          <v-btn color="primary" :disabled="allProperties.edited.size == 0" @click="setDone(3, 4)">Continue
-          </v-btn>
-          <v-btn text>Cancel</v-btn>
         </v-stepper-content>
         <v-stepper-content step="4">
-          <v-card class="mb-12" height="450px"></v-card>
-          <v-btn raised @click="downloadAsFile()">save</v-btn>
-          <v-btn raised color="primary" @click="setDone(4)">Continue</v-btn>
+          <v-card class="mb-12" height="650px">
+            <v-card-text>
+              <v-container>
+                <v-row>
+                  <v-col cols="4" class="jsonObj elevation-1">
+                    <vue-json-pretty
+                      :data="template"
+                      :deep="4"></vue-json-pretty>
+                  </v-col>
+                  <v-col cols='4' class="jsonObj elevation-0">
+                    <vue-json-pretty class="jsonObj" :data="srcObject"
+                                     :deep="4"></vue-json-pretty>
+                  </v-col>
+                  <v-col cols="4" class="jsonObj elevation-3 overflow-auto">
+                    <pre>
+                      {{generatedSource}}
+                    </pre>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card-text>
+            <v-card-actions>
+              <v-select
+                v-model="selectedLang"
+                :items="genLanguages"
+                label="Select Language"
+                return-object
+                dense
+                item-value="name"
+              ></v-select>
+              <v-btn raised @click="generateSource()">generate source</v-btn>
+              <v-btn raised @click="downloadAsFile()">save</v-btn>
+              <v-btn raised color="primary" @click="setDone(4)">Continue</v-btn>
+            </v-card-actions>
+          </v-card>
         </v-stepper-content>
       </v-stepper-items>
     </v-stepper>
@@ -347,7 +392,7 @@
 
 <script>
 import VueJsonPretty from 'vue-json-pretty'
-
+import gen from '../lago-gen'
 const primitiveTypes = {
   Integer: undefined,
   Text: undefined,
@@ -372,36 +417,36 @@ export default {
       fourth: false,
       // 사용작 입력한 최초의 입력 데이터
       srcData: '{\n' +
-          '  "name": "샘플",\n' +
-          '  "desc": "설명",\n' +
-          '  "url": "https://baikal.ai/",\n' +
-          '  "contentRating": "",\n' +
-          '  "award": "국어원 코퍼스 1등상",\n' +
-          '  "comment": {},\n' +
-          '  "distribution": {\n' +
-          '    "uploadDate": "2020-12-16T23:04:18Z",\n' +
-          '    "accessMode": "chartOnVisual",\n' +
-          '    "audience": {\n' +
-          '      "audienceType": "veterans"\n' +
-          '    },\n' +
-          '    "author": {\n' +
-          '      "name": "Baikal AI"\n' +
-          '    }\n' +
-          '  },\n' +
-          '  "author": {\n' +
-          '    "name": "Baikal AI",\n' +
-          '    "email": "gih2yun@baikal.ai"\n' +
-          '  },\n' +
-          '  "creator": {\n' +
-          '    "name": "Baikal AI",\n' +
-          '    "email": "gih2yun@baikal.ai"\n' +
-          '  },\n' +
-          '  "dateCreated": "2020-12-16T23:04:18Z",\n' +
-          '  "dateModified": "2020-12-16T23:04:18Z",\n' +
-          '  "datePublished": "2020-12-16T23:04:18Z",\n' +
-          '  "genre": "Korean Language",\n' +
-          '  "typicalAgeRange": "7-21"\n' +
-          '}',
+        '  "name": "샘플",\n' +
+        '  "desc": "설명",\n' +
+        '  "url": "https://baikal.ai/",\n' +
+        '  "contentRating": "",\n' +
+        '  "award": "국어원 코퍼스 1등상",\n' +
+        '  "comment": {},\n' +
+        '  "distribution": {\n' +
+        '    "uploadDate": "2020-12-16T23:04:18Z",\n' +
+        '    "accessMode": "chartOnVisual",\n' +
+        '    "audience": {\n' +
+        '      "audienceType": "veterans"\n' +
+        '    },\n' +
+        '    "author": {\n' +
+        '      "name": "Baikal AI"\n' +
+        '    }\n' +
+        '  },\n' +
+        '  "author": {\n' +
+        '    "name": "Baikal AI",\n' +
+        '    "email": "gih2yun@baikal.ai"\n' +
+        '  },\n' +
+        '  "creator": {\n' +
+        '    "name": "Baikal AI",\n' +
+        '    "email": "gih2yun@baikal.ai"\n' +
+        '  },\n' +
+        '  "dateCreated": "2020-12-16T23:04:18Z",\n' +
+        '  "dateModified": "2020-12-16T23:04:18Z",\n' +
+        '  "datePublished": "2020-12-16T23:04:18Z",\n' +
+        '  "genre": "Korean Language",\n' +
+        '  "typicalAgeRange": "7-21"\n' +
+        '}',
       srcObject: null,
       secondStepError: null,
       firstStepError: null,
@@ -447,7 +492,11 @@ export default {
       snack: {
         text: null,
         show: false
-      }
+      },
+      template: null,
+      generatedSource: 'function ()\n{\n}\n',
+      genLanguages: ['JavaScript', 'Java'],
+      selectedLang: 'JavaScript'
     }
   },
   methods: {
@@ -497,8 +546,8 @@ export default {
       if (this.e1 === 3) {
         this.getAllProperties()
       }
-      if (this.el == 4) {
-        this.makeTemplate()
+      if (this.e1 === 4) {
+        this.template = this.makeTemplate()
       }
     },
     setError () {
@@ -540,6 +589,7 @@ export default {
         const primitive = strTypes[0] in primitiveTypes
         const o = {
           name: name,
+          nam: name,
           from: thing.getName(),
           desc: prop.getDescription(),
           inputType: strTypes[0],
@@ -712,11 +762,85 @@ export default {
       this.snack.text = msg
       this.snack.show = true
     },
-    makeTemplate() {
-      const temp = {}
+    makeTemplate () {
+      const active = this.activeClass
+      const temp = {
+        '@context': 'https://schema.org',
+        '@type': active.getName()
+      }
 
-      this.template = temp
+      const putValue = (dest, obj) => {
+        if (obj.value.length > 0) {
+          if (obj.inputType === 'Number') {
+            dest[obj.nam] = Number.parseInt(obj.value)
+          } else {
+            dest[obj.nam] = obj.value
+          }
+        } else {
+          dest[obj.nam] = '{{' + obj.link + '}}'
+        }
+      }
+
+      const findObject = (from, name) => {
+        // name = rootMember.sub1Member,sub2Member
+        // topDown 방식으로 만드는 거이 바람직합니다.
+        const paths = name.split('.')
+        let target = from
+        const schemaRoot = this.allProperties.allProps
+        let schemaArr = schemaRoot
+        for (const elem of paths) {
+          const idx = schemaArr.map(x => x.nam).indexOf(elem)
+          // 타입 이름을 가져올 수 있는 객체
+          const nextObj = schemaArr[idx]
+          if (nextObj.primitive) {
+            return target
+          }
+          if (target[elem] === undefined) {
+            // 찾으려고 하는 객체가 없는 경우, 여기서는 nam을 사용함.
+            target[elem] = {
+              '@type': nextObj.inputType
+            }
+          }
+          target = target[elem]
+          schemaArr = nextObj.subProps
+        }
+        // 최종적으로 발견된 객체
+        return target
+      }
+
+      this.allProperties.edited.forEach((v, k) => {
+        console.log('make template', k, v)
+        if (v.parent === null) {
+          console.log('make direct ...')
+          putValue(temp, v)
+          console.log('after v', temp, v)
+        } else {
+          putValue(findObject(temp, k), v)
+          console.log('after v subsub', temp, k, v)
+        }
+      })
+
+      console.log('after v subsub', temp)
+      return temp
+    },
+    // _conv (dataMapping, srcData) {
+    //   const ret = {}
+    //   for (const [key, value] of Object.entries(dataMapping)) {
+    //     if (typeof value === 'object') {
+    //       ret[key] = _conv(value, srcData)
+    //     } else {
+    //       ret[key] = Mustache.render(value, srcData)
+    //     }
+    //   }
+    //   return ret
+    // },
+    generateSource () {
+      this.generatedSource = gen.generateSource(this.selectedLang,
+        this.activeClass.getName(),
+        this.template)
+      // this._conv(this.template, this.srcObject)
     }
+
   },
   computed: {
     filterNode () {
@@ -814,9 +938,10 @@ export default {
   @import '~vue-json-pretty/lib/styles.css';
 
   .srcData {
-    height: 500px;
-    min-height: 500px;
+    height: 450px;
+    min-height: 450px;
     max-height: 600px;
+    width: 100%;
   }
 
   .selected {
@@ -825,7 +950,7 @@ export default {
 
   .jsonObj {
     height: 100%;
-    max-height: 650px;
+    max-height: 550px;
     overflow-y: auto;
     overflow-x: scroll;
   }
@@ -838,7 +963,7 @@ export default {
   #propEdit {
     min-height: 500px;
     height: 100%;
-    max-height: 650px;
+    max-height: 550px;
     overflow: auto;
   }
 
