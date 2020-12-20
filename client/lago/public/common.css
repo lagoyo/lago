@@ -1,3 +1,16 @@
+#srcData {
+    height: 65vh;
+}
+
+.schematreeProp{
+    height: 100%;
+}
+.schemaBrowserScroll{
+    height: 90% !important;
+}
+.secondSchemaDirectory{
+    height: 65vh;
+}
 .indent-bg-0 {
 }
 .indent-bg-1 {

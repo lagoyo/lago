@@ -19,56 +19,48 @@
       </v-stepper-header>
       <v-stepper-items>
         <v-stepper-content step="1">
-          <v-card class="mb-12" min-height="500px" height="560">
-            <v-card-title>
-              <p>아래에 스키마 형식으로 변환할 원본 데이터를 입력하세요.
-                원본 JSON 내용을 복사하면 됩니다.</p>
-            </v-card-title>
-            <v-card-text>
-              <v-textarea v-model="srcData" class="srcData" height="400" full-width rows="15"
-                          placeholder="여기에 JSON 데이터를 입력하세요.">
-                {
-                "name": "샘플",
-                "desc": "설명",
-                "url": "https://baikal.ai/",
-                "contentRating": "",
-                "award": "국어원 코퍼스 1등상",
-                "comment": {},
-                "distribution": {
-                "uploadDate": "2020-12-16T23:04:18Z",
-                "accessMode": "chartOnVisual",
-                "audience": {
-                "audienceType": "veterans"
-                },
-                "author": {
-                "name": "Baikal AI"
-                }
-                },
-                "author": {
-                "name": "Baikal AI",
-                "email": "gih2yun@baikal.ai"
-                },
-                "creator": {
-                "name": "Baikal AI",
-                "email": "gih2yun@baikal.ai"
-                },
-                "dateCreated": "2020-12-16T23:04:18Z",
-                "dateModified": "2020-12-16T23:04:18Z",
-                "datePublished": "2020-12-16T23:04:18Z",
-                "genre": "Korean Language",
-                "typicalAgeRange": "7-21"
-                }
-              </v-textarea>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn raised elevation="1" primary @click="loadJson()">Continue</v-btn>
-              <v-content v-if="firstStepError"><p>{{firstStepError}}</p></v-content>
-            </v-card-actions>
+          <v-card class="mb-12" height="75vh">
+            <v-textarea v-model="srcData" class="srcData" rows="15" id="srcData"
+                        placeholder="여기에 JSON 데이터를 입력하세요.">
+              {
+              "name": "샘플",
+              "desc": "설명",
+              "url": "https://baikal.ai/",
+              "contentRating": "",
+              "award": "국어원 코퍼스 1등상",
+              "comment": {},
+              "distribution": {
+              "uploadDate": "2020-12-16T23:04:18Z",
+              "accessMode": "chartOnVisual",
+              "audience": {
+              "audienceType": "veterans"
+              },
+              "author": {
+              "name": "Baikal AI"
+              }
+              },
+              "author": {
+              "name": "Baikal AI",
+              "email": "gih2yun@baikal.ai"
+              },
+              "creator": {
+              "name": "Baikal AI",
+              "email": "gih2yun@baikal.ai"
+              },
+              "dateCreated": "2020-12-16T23:04:18Z",
+              "dateModified": "2020-12-16T23:04:18Z",
+              "datePublished": "2020-12-16T23:04:18Z",
+              "genre": "Korean Language",
+              "typicalAgeRange": "7-21"
+              }
+            </v-textarea>
+            <v-content v-if="firstStepError"><p>{{firstStepError}}</p></v-content>
+            <v-btn raised elevation="2" primary @click="loadJson()">Continue</v-btn>
           </v-card>
         </v-stepper-content>
-        <v-stepper-content step="2">
+        <v-stepper-content step="2" >
           <v-container class="pa-0" fluid>
-            <v-row class="pa-0">
+            <v-row class="pa-0 secondSchemaDirectory">
               <v-col cols="6" class="pa-0">
                 <v-card
                   class="mx-auto"
@@ -139,7 +131,7 @@
           <v-btn text>Cancel</v-btn>
         </v-stepper-content>
         <v-stepper-content step="3">
-          <v-card class="mb-12" min-height="550px">
+          <v-card class="mb-12" min-height="650px" height="75vh">
             <v-sheet class="lighten-1" v-if="activeClass">
               <v-container fluid>
                 <v-row no-gutters>
@@ -546,8 +538,8 @@ export default {
       if (this.e1 === 3) {
         this.getAllProperties()
       }
-      if (this.e1 === 4) {
-        this.template = this.makeTemplate()
+      if (this.el === 4) {
+        this.makeTemplate()
       }
     },
     setError () {
@@ -937,33 +929,23 @@ export default {
 <style scoped lang="scss">
   @import '~vue-json-pretty/lib/styles.css';
 
-  .srcData {
-    height: 450px;
-    min-height: 450px;
-    max-height: 600px;
-    width: 100%;
-  }
-
   .selected {
     background-color: antiquewhite;
   }
-
   .jsonObj {
-    height: 100%;
-    max-height: 550px;
+    height: 62vh;
     overflow-y: auto;
     overflow-x: scroll;
   }
 
   #treeView {
-    height: 500px;
+    height: 58vh;
     overflow: auto;
   }
 
   #propEdit {
     min-height: 500px;
-    height: 100%;
-    max-height: 550px;
+    height: 58vh;
     overflow: auto;
   }
 
@@ -1124,7 +1106,7 @@ export default {
   }
 
   .content {
-    min-height: 600px;
+    height: 88vh;
   }
 
   .lower {

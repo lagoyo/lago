@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-card class="pt-4">
+    <v-card class="pt-4" height="80vh">
       <v-card-title>
         <h4 class="title">대시 보드에 넣을 것</h4>
       </v-card-title>
