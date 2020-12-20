@@ -2,7 +2,7 @@
   <v-container class="schemaBowserScroll" fluid>
     <v-row>
       <v-col cols="3">
-        <v-card class="pa-4" height="80vh">
+        <v-card class="pa-4">
           <v-card-title>
             Select schema class
           </v-card-title>
@@ -199,7 +199,7 @@ export default {
     background-color: antiquewhite;
   }
   #schemaView {
-    height: 80vh;
+    height: calc(100vh - 250px);
     overflow: auto;
   }
 </style>

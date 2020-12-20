@@ -1,5 +1,5 @@
 <template>
-  <div class="content">
+  <div>
     <v-stepper v-model="e1">
       <v-stepper-header>
         <v-stepper-step id="first" :complete="e1 > 1" step="1">
@@ -19,9 +19,10 @@
       </v-stepper-header>
       <v-stepper-items>
         <v-stepper-content step="1">
-          <v-card class="mb-12" height="75vh">
-            <v-textarea v-model="srcData" class="srcData" rows="15" id="srcData"
-                        placeholder="여기에 JSON 데이터를 입력하세요.">
+          <v-card class="mb-12">
+            <v-textarea v-model="srcData" rows="15" id="srcData" height="100%"
+            :style="getHeight('srcData', 0.6)" class="mb-10"
+            placeholder="여기에 JSON 데이터를 입력하세요.">
               {
               "name": "샘플",
               "desc": "설명",
@@ -58,9 +59,10 @@
             <v-btn raised elevation="2" primary @click="loadJson()">Continue</v-btn>
           </v-card>
         </v-stepper-content>
-        <v-stepper-content step="2" >
-          <v-container class="pa-0" fluid>
-            <v-row class="pa-0 secondSchemaDirectory">
+        <v-stepper-content step="2">
+          <v-container class="pa-0" fluid  id="schemaInputWrapper"
+          :style="getStaticHeight('schemaInputWrapper', 300)">
+            <v-row class="pa-0">
               <v-col cols="6" class="pa-0">
                 <v-card
                   class="mx-auto"
@@ -78,7 +80,8 @@
                       clear-icon="mdi-close-circle-outline"
                     ></v-text-field>
                   </v-sheet>
-                  <v-card-text id="treeView">
+                  <v-card-text id="treeView"
+                  :style="getStaticHeight('treeView', 440, 440)">
                     <v-treeview
                       :items="sdoNodes"
                       itemKey="iri"
@@ -106,8 +109,10 @@
                   </v-card-text>
                 </v-card>
               </v-col>
-              <v-col cols="6">
+              <v-col cols="6" >
                 <vue-json-pretty class="jsonObj" :data="srcObject"
+                id="schemdaInputJsonObj"
+              :style="getStaticHeight('schemdaInputJsonObj', 390)"
                                  :deep="4"></vue-json-pretty>
               </v-col>
             </v-row>
@@ -447,10 +452,14 @@ export default {
       snack: {
         text: null,
         show: false
-      }
+      },
+      windowHeight: window.innerHeight
     }
   },
   methods: {
+    onResize () {
+      this.windowHeight = window.innerHeight
+    },
     loadJson () {
       if (this.srcData !== undefined) {
         try {
@@ -716,7 +725,97 @@ export default {
       const temp = {}
 
       this.template = temp
+    },
+    setHeight (elementId, divisionRate) {
+      const windowHeight = this.windowHeight
+      // console.log('onLoad () window height ', windowHeight)
+      // console.log(' onLoad () return ', windowHeight * divisionRate)
+
+      var elem = document.getElementById(elementId)
+      if (elem != null) {
+        console.log(elem)
+        elem.style = 'height: ' + windowHeight * divisionRate + 'px'
+        // console.log('onLoad () set ' + elementId)
+      } else {
+        // console.log('onLoad () ' + elementId + ' is null')
+      }
+    },
+    setStaticHeight (elementId, subVal) {
+      const windowHeight = this.windowHeight
+      // console.log('onLoad () window height ', windowHeight)
+      // console.log('onLoad () return ', windowHeight - subVal)
+      var elem = document.getElementById(elementId)
+      if (elem != null) {
+        // console.log(elem)
+        elem.style = 'height: ' + windowHeight - subVal + 'px'
+        // console.log('set ' + elementId)
+      } else {
+        // console.log(elementId + ' is null')
+      }
+    },
+    getHeight (elementId, divisionRate) {
+      const windowHeight = this.windowHeight
+      // console.log('window height ', windowHeight)
+      // console.log('return ', windowHeight * divisionRate)
+
+      // console.log('return obj ', { height: windowHeight * divisionRate + 'px' })
+      var elem = document.getElementById(elementId)
+      if (elem != null) {
+        // console.log(elem)
+        elem.style = 'height: ' + windowHeight * divisionRate + 'px'
+        // console.log('set ' + elementId)
+      } else {
+        // console.log(elementId + ' is null')
+      }
+
+      return { height: windowHeight * divisionRate + 'px' }
+    },
+    getStaticHeight (elementId, subVal, maxHeight = false, overflow = false) {
+      const windowHeight = this.windowHeight
+      // console.log('window height ', windowHeight)
+      // console.log('return ', windowHeight - subVal)
+
+      // console.log('return obj ', { height: windowHeight - subVal + 'px' })
+      var elem = document.getElementById(elementId)
+      var styleString = ''
+      var styleObj = {}
+
+      if (elem != null) {
+        console.log(elem)
+
+        if (maxHeight !== false) {
+          styleString += 'height: ' + windowHeight - subVal + 'px;'
+          styleString += 'max-height: ' + windowHeight - subVal + 'px;'
+          styleObj.height = windowHeight - subVal + 'px'
+          styleObj.maxHeight = windowHeight - subVal + 'px'
+        } else {
+          styleString += 'height: ' + windowHeight - subVal + 'px;'
+          styleObj.height = windowHeight - subVal + 'px'
+        }
+        if (overflow !== false) {
+          styleString += 'overflow: auto;'
+          styleObj.overflow = 'auto'
+        } else {
+        }
+        elem.style = styleString
+        // console.log('set ' + elementId + '=' + styleString)
+        return styleObj
+      } else {
+        // console.log(elementId + ' is null')
+      }
     }
+  },
+  mounted () {
+    this.$nextTick(() => {
+      this.setHeight('srcData', 0.6)
+      this.setStaticHeight('schemaInputWrapper', 300)
+      this.setStaticHeight('treeView', 450)
+      this.setStaticHeight('schemdaInputJsonObj', 400)
+      window.addEventListener('resize', this.onResize)
+    })
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.onResize)
   },
   computed: {
     filterNode () {
@@ -817,19 +916,17 @@ export default {
     background-color: antiquewhite;
   }
   .jsonObj {
-    height: 62vh;
     overflow-y: auto;
     overflow-x: scroll;
   }
 
   #treeView {
-    height: 58vh;
+    max-height: calc(100vh - 440px);
     overflow: auto;
   }
 
   #propEdit {
     min-height: 500px;
-    height: 58vh;
     overflow: auto;
   }
 
@@ -987,10 +1084,6 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .content {
-    height: 88vh;
   }
 
   .lower {

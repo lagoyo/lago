@@ -45,17 +45,17 @@
           </v-card-text>
         </v-card>
       </v-col>
-      <v-col cols="8" height="65hv">
+      <v-col cols="8" ref="schematreeProp">
 <!--        <p>Open: {{openNodes}}</p>-->
 <!--        <p>Tree:{{tree}}</p>-->
 <!--        <p>Active: {{activeNodes}}</p>-->
 <!--        <p>Seach: {{search}}</p>-->
-        <v-card v-if="activeClass" class="schematreeProp">
-          <v-sheet class="pa-4 accent lighten-1">
+        <v-card v-if="activeClass">
+          <v-sheet class="pa-4 accent lighten-1" ref="schemaPropName">
             <span class="font-weight-bold">{{activeClass.getName()}}</span>
             <a class="pa-10" :target="activeClass.getName()" :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
           </v-sheet>
-          <v-card-subtitle>
+          <v-card-subtitle ref="schemaPropDesc">
             <p><span v-html="activeClass.getDescription()"></span></p>
           </v-card-subtitle>
           <v-card-text>
@@ -121,8 +121,22 @@ export default {
         { text: 'Type', value: 'type' },
         { text: 'Description', value: 'desc', sortable: false }
       ],
-      chipPropKey: ''
+      chipPropKey: '',
+      windowHeight: window.innerHeight
     }
+  },
+  mounted () {
+    this.$nextTick(() => {
+      window.addEventListener('resize', this.onResize)
+
+      // const propHeight = this.getPropHeight()
+      // const propNameHeight = this.getPropNameHeight()
+      // const propDescHeight = this.getPropDescHeight()
+      // this.setPropViewHeight(propHeight, propNameHeight, propDescHeight)
+    })
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.onResize)
   },
   computed: {
     propKey () {
@@ -220,6 +234,38 @@ export default {
     }
   },
   methods: {
+    onResize () {
+      this.windowHeight = window.innerHeight
+      // const propHeight = this.getPropHeight()
+      // const propNameHeight = this.getPropNameHeight()
+      // const propDescHeight = this.getPropDescHeight()
+      // this.setPropViewHeight(propHeight, propNameHeight, propDescHeight)
+    },
+    getPropHeight () {
+      const propDOM = this.$refs.schematreeProp
+      console.log('proheight is ' + propDOM.clientHeight)
+      return propDOM.clientHeight
+    },
+    getPropNameHeight () {
+      // const propDOM = this.$refs.schemaPropName
+      // console.log('propnameheight is ' + propDOM.clientHeight)
+      // return propDOM.clientHeight
+      return 56
+    },
+    getPropDescHeight () {
+      // const propDOM = this.$refs.schemaPropDesc
+      // console.log('propdescheight is ' + propDOM.clientHeight)
+      // return propDOM.clientHeight
+      return 114
+    },
+    setPropViewHeight (height, nameHeight, descHeight) {
+      console.log('param ', height, ' ', nameHeight, ' ', descHeight)
+      var propViewDOM = document.getElementById('propView')
+      var styleString = 'height: ' + (height - nameHeight - descHeight) + 'px;'
+      styleString += 'overflow: auto;'
+      console.log('set to ' + 'height: ' + (height - nameHeight - descHeight) + 'px')
+      propViewDOM.style = styleString
+    },
     getProps (thing) {
       const name = thing.getName()
       // console.log('thing get props', name)
@@ -302,11 +348,11 @@ export default {
 
 <style scoped lang="scss">
   #treeView {
-    height: 73vh;
+    height: calc(100vh - 300px);
     overflow: auto;
   }
   #propView {
-    height: 600px;
+    height: calc(100vh - 430px);
     overflow: auto;
   }
 </style>

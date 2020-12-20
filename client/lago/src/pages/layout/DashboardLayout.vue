@@ -10,7 +10,9 @@
 <!--        </transition>-->
       </v-tab-item>
     </v-tabs>
-    <content-footer v-if="!$route.meta.hideFooter"></content-footer>
+    <v-footer height="40px" fixed=true>
+      <content-footer v-if="!$route.meta.hideFooter"></content-footer>
+    </v-footer>
   </div>
 </template>
 

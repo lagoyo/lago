@@ -17,13 +17,11 @@
         />
         <span>라고 / LAGO : the data typed as</span>
       </div>
-
       <v-spacer></v-spacer>
     </v-app-bar>
     <v-main>
       <router-view></router-view>
     </v-main>
-    <v-footer></v-footer>
   </v-app>
 </template>
 

@@ -31,12 +31,12 @@ export default {}
 </script>
 <style scoped lang="scss">
   .footer {
-    position: absolute;
-    bottom: 0;
-    padding: 15px 0;
+    padding: 0;
+    margin: 0;
     .container {
       padding-right: 30px;
       padding-left: 30px;
+      padding: 0;
       display: flex;
       justify-content: space-between;
 
@@ -55,7 +55,8 @@ export default {}
 
           a {
             color: inherit !important;
-            padding: 15px;
+            padding-left: 15px;
+            padding-right: 15px;
             font-weight: 300;
             font-size: 12px;
             text-transform: uppercase;
@@ -72,7 +73,8 @@ export default {}
       }
 
       .copyright {
-        padding: 15px 0;
+        padding-right: 10px;
+        padding-left: 10px;
         margin: 0;
 
         .material-icons {
