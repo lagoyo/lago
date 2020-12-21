@@ -1,19 +1,19 @@
 <template>
   <div>
-    <v-stepper v-model="e1">
+    <v-stepper v-model="step">
       <v-stepper-header>
-        <v-stepper-step id="first" :complete="e1 > 1" step="1">
+        <v-stepper-step id="first" :complete="step > 1" step="1">
           샘플 데이터 입력하기
         </v-stepper-step>
         <v-divider></v-divider>
-        <v-stepper-step id="second" :complete="e1 > 2" step="2">
+        <v-stepper-step id="second" :complete="step > 2" step="2">
           스키마 선택하기
         </v-stepper-step>
         <v-divider></v-divider>
-        <v-stepper-step id="third" :complete="e1 > 3" step="3">
+        <v-stepper-step id="third" :complete="step > 3" step="3">
           스키마 데이터 입력하기
         </v-stepper-step>
-        <v-stepper-step id="fourth" :complete="e1 > 4" step="4">
+        <v-stepper-step id="fourth" :complete="step > 4" step="4">
           코드 생성 및 다운로드
         </v-stepper-step>
       </v-stepper-header>
@@ -22,38 +22,7 @@
           <v-card class="mb-12">
             <v-textarea v-model="srcData" rows="15" id="srcData" height="max-content"
             :style="getStaticHeight('srcData', 350, maxHeight=350)" class="mb-10"
-            placeholder="여기에 JSON 데이터를 입력하세요.">
-              {
-              "name": "샘플",
-              "desc": "설명",
-              "url": "https://baikal.ai/",
-              "contentRating": "",
-              "award": "국어원 코퍼스 1등상",
-              "comment": {},
-              "distribution": {
-              "uploadDate": "2020-12-16T23:04:18Z",
-              "accessMode": "chartOnVisual",
-              "audience": {
-              "audienceType": "veterans"
-              },
-              "author": {
-              "name": "Baikal AI"
-              }
-              },
-              "author": {
-              "name": "Baikal AI",
-              "email": "gih2yun@baikal.ai"
-              },
-              "creator": {
-              "name": "Baikal AI",
-              "email": "gih2yun@baikal.ai"
-              },
-              "dateCreated": "2020-12-16T23:04:18Z",
-              "dateModified": "2020-12-16T23:04:18Z",
-              "datePublished": "2020-12-16T23:04:18Z",
-              "genre": "Korean Language",
-              "typicalAgeRange": "7-21"
-              }
+            placeholder="JSON.stringify(srcData)">
             </v-textarea>
             <v-content v-if="firstStepError"><p>{{firstStepError}}</p></v-content>
             <v-btn raised elevation="2" primary @click="loadJson()">Continue</v-btn>
@@ -151,7 +120,7 @@
                 <v-row no-gutters>
                   <label>전체 편집</label>
                   <v-chip label class="ma-1">
-                    {{editedProps.size}}</v-chip>
+                    {{editedSize}}</v-chip>
                   <label> 입력 소스와 연결: </label>
                   <v-chip class="ma-1" label>{{linkedItems}}</v-chip>
                   <label> 직접 편집: </label>
@@ -331,7 +300,7 @@
             <v-card-actions>
               <v-btn
                 color="primary"
-                :disabled="editedProps.size == 0"
+                :disabled="editedSize == 0"
                 @click="setDone(3, 4)">Continue
               </v-btn>
               <v-btn text>Cancel</v-btn>
@@ -412,6 +381,7 @@
     </v-stepper>
     <v-snackbar
       v-model="snack.show"
+      :timeout="3000"
       multi-line
     >
       {{ snack.text }}
@@ -452,7 +422,7 @@ export default {
   },
   data () {
     return {
-      e1: 1,
+      step: 1,
       first: false,
       second: false,
       third: false,
@@ -516,7 +486,7 @@ export default {
         props: {},
         editingItem: null
       },
-      editedProps: new Map(),
+      editedProps: [],
       jsonSelect: {
         value: 'res.error',
         selectableType: 'single',
@@ -578,26 +548,26 @@ export default {
       this.selected = obj
     },
     setDone (id, index) {
-      console.log('set done', id, index)
-      this.e1 = index
-      this.secondStepError = null
-
-      if (index) {
-        this.active = index
-      }
-      console.log(this.active)
-      if (this.e1 === 2) {
-        console.log(this.$sdo.sdoClasses)
-      }
-      if (this.e1 === 3) {
-        this.getAllProperties()
-      }
-      if (this.e1 === 4) {
-        this.makeTemplate()
-        this.generateSource()
-      }
+      // console.log('set done', id, index)
       if (id === 4) {
         this.saveToLocalStorage()
+        return
+      }
+      if (index) {
+        this.step = index
+        this.active = index
+        console.log('setDone active', this.active)
+        this.secondStepError = null
+        if (this.step === 2) {
+          console.log(this.$sdo.sdoClasses)
+        }
+        if (this.step === 3) {
+          this.getAllProperties()
+        }
+        if (this.step === 4) {
+          this.makeTemplate()
+          this.generateSource()
+        }
       }
     },
     setError () {
@@ -750,10 +720,16 @@ export default {
       node.expanded = true
     },
     editOrLinkItem (item, add = true) {
+      const idx = this.editedProps.map(x => x.name).indexOf(item.name)
       if (add) {
-        this.editedProps.set(item.name, item)
+        if (idx > -1) {
+          this.editedProps.splice(idx, 1)
+        }
+        this.editedProps.push(item)
       } else {
-        this.editedProps.delete(item.name)
+        if (idx > -1) {
+          this.editedProps.splice(idx, 1)
+        }
       }
     },
     useLink (item) {
@@ -862,15 +838,15 @@ export default {
         return target
       }
 
-      this.editedProps.forEach((v, k) => {
-        console.log('make template', k, v)
+      this.editedProps.forEach((v) => {
+        console.log('make template', v)
         if (v.parent === null) {
           console.log('make direct ...')
           putValue(temp, v)
           console.log('after v', temp, v)
         } else {
-          putValue(findObject(temp, k), v)
-          console.log('after v subsub', temp, k, v)
+          putValue(findObject(temp, v.name), v)
+          console.log('after v subsub', temp, v.name, v)
         }
       })
 
@@ -939,10 +915,10 @@ export default {
     getSchemaDescHeight () {
       const propDOM = this.$refs.shcemaInputDesc
       if (propDOM != null) {
-        console.log('getSchemaDescHeight is ' + propDOM.clientHeight)
+        // console.log('getSchemaDescHeight is ' + propDOM.clientHeight)
         return propDOM.clientHeight
       } else {
-        console.log('getSchemaDescHeight is None')
+        // console.log('getSchemaDescHeight is None')
         return 0
       }
     },
@@ -967,7 +943,7 @@ export default {
       const styleObj = {}
 
       if (elem != null) {
-        console.log(elem)
+        // console.log(elem)
 
         if (maxHeight !== false) {
           styleString += 'height: ' + String(windowHeight - subVal) + 'px;'
@@ -984,7 +960,7 @@ export default {
         } else {
         }
         elem.style = styleString
-        console.log('set ' + elementId + '=' + styleString)
+        // console.log('set ' + elementId + '=' + styleString)
         return styleObj
       } else {
         // console.log(elementId + ' is null')
@@ -1074,23 +1050,13 @@ export default {
       return this.jsonSrcSelected.enabled ? this.jsonSrcSelected.path : ''
     },
     editedSize () {
-      return this.editedProps.size
+      return this.editedProps.length
     },
     linkedItems () {
-      let cnt = 0
-      this.editedProps.forEach((k, v) => {
-        console.log('linked items', k, v)
-        if (v.link != null) { cnt++ }
-      })
-      return cnt
+      return this.editedProps.filter(x => x.link != null).length
     },
     editedItems () {
-      let cnt = 0
-      this.editedProps.forEach((k, v) => {
-        console.log('editedItems items', k, v)
-        if (v.value.length > 0) { cnt++ }
-      })
-      return cnt
+      return this.editedProps.filter(x => x.value.length > 0).length
     }
   }
 }
