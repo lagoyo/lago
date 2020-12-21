@@ -7,7 +7,7 @@ import App from './App'
 import routes from './routes'
 
 import vuetify from './plugins/vuetify'
-
+import Clipboard from 'v-clipboard'
 import SDO from './sdo'
 
 // configure router
@@ -26,6 +26,7 @@ SDO.install = function () {
 }
 
 Vue.use(SDO)
+Vue.use(Clipboard)
 
 /* eslint-disable no-new */
 new Vue({

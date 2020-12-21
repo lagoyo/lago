@@ -69,7 +69,7 @@
                 >
                   <v-sheet class="pa-2 primary lighten-2">
                     <v-text-field
-                      v-model="search"
+                      v-model="treeSearch"
                       label="Search Schema Directory"
                       dark
                       flat
@@ -88,7 +88,7 @@
                       :open.sync="openNodes"
                       :active.sync="activeNodes"
                       :filter="filterNode"
-                      :search="search"
+                      :search="treeSearch"
                       rounded
                       v-model="tree"
                       dense
@@ -98,8 +98,7 @@
                       color="warning">
                       <template v-slot:prepend="{ item, open, active }">
                         <v-icon v-if="item.children">
-                          {{active ? 'mdi-folder-star':
-                          (open ? 'mdi-folder-open' : 'mdi-folder')}}
+                          {{active ? 'mdi-folder-star': (open ? 'mdi-folder-open' : 'mdi-folder')}}
                         </v-icon>
                         <v-icon v-else>
                           {{active ? 'mdi-cube-send' : 'mdi-cube'}}
@@ -110,10 +109,11 @@
                 </v-card>
               </v-col>
               <v-col cols="6" >
-                <vue-json-pretty class="jsonObj" :data="srcObject"
-                id="schemdaInputJsonObj"
-                :style="getStaticHeight('schemdaInputJsonObj', 430 + getSchemaDescHeight(), 430 + getSchemaDescHeight())"
-                                 :deep="4"></vue-json-pretty>
+                <vue-json-pretty
+                  class="jsonObj" :data="srcObject"
+                  id="schemdaInputJsonObj"
+                  :style="getStaticHeight('schemdaInputJsonObj', 430 + getSchemaDescHeight(), 430 + getSchemaDescHeight())"
+                  :deep="4"></vue-json-pretty>
               </v-col>
             </v-row>
             <v-row>
@@ -197,7 +197,7 @@
                             <v-tooltip bottom>
                               <template v-slot:activator="{ on, attrs }">
                                 <span v-bind="attrs" v-on="on">
-                                  {{getNameInfo(item.name).show}}
+                                  {{item.shortenName}}
                                 </span>
                               </template>
                               <span>{{item.name}}</span>
@@ -348,6 +348,7 @@
                       id="srcTemplate"
                       :style="getStaticHeight('srcTemplate', 450, 450)"
                       >
+                      <span>변환 템플릿</span>
                       <vue-json-pretty
                         :data="template"
                         :deep="4"></vue-json-pretty>
@@ -356,8 +357,9 @@
                   <v-col cols='4' class="jsonObj elevation-0">
                     <div
                       id="srcObject"
-                      :style="getStaticHeight('srcTemplate', 450, 450)"
+                      :style="getStaticHeight('srcObject', 450, 450)"
                     >
+                      <span>입력 소스 데이터</span>
                       <vue-json-pretty class="jsonObj" :data="srcObject"
                                        :deep="4"></vue-json-pretty>
                     </div>
@@ -365,7 +367,8 @@
                   <v-col cols="4" class="jsonObj elevation-3 overflow-auto">
                     <div
                       id="genSource"
-                      :style="getStaticHeight('srcTemplate', 450, 450)">
+                      :style="getStaticHeight('genSource', 450, 450)">
+                      <span>생성된 {{selectedLang}} 코드</span>
                       <pre>{{generatedSource}}</pre>
                     </div>
                   </v-col>
@@ -382,16 +385,22 @@
                     return-object
                     dense
                     item-value="name"
+                    @change="generateSource"
                   ></v-select>
                 </v-col>
-                <v-col cols="2" class="pa-1">
-                  <v-btn raised @click="generateSource()">generate source</v-btn>
+<!--                <v-col cols="2" class="pa-1">-->
+<!--                  <v-btn raised @click="generateSource()">generate source</v-btn>-->
+<!--                </v-col>-->
+                <v-col cols="1" class="pa-1">
+                  <v-btn
+                    v-clipboard="() => generatedSource"
+                    v-clipboard:success="copyToClipSucc"
+                    v-clipboard:error="copyToClipError"
+                    raised
+                  >save</v-btn>
                 </v-col>
                 <v-col cols="1" class="pa-1">
-                  <v-btn raised @click="downloadAsFile()">save</v-btn>
-                </v-col>
-                <v-col cols="1" class="pa-1">
-                  <v-btn raised color="primary" @click="setDone(4)">Continue</v-btn>
+                  <v-btn raised color="primary" @click="setDone(4)">Done</v-btn>
                 </v-col>
               </v-row>
             </v-card-actions>
@@ -423,6 +432,7 @@
 <script>
 import VueJsonPretty from 'vue-json-pretty'
 import gen from '../lago-gen'
+
 const primitiveTypes = {
   Integer: undefined,
   Text: undefined,
@@ -491,7 +501,7 @@ export default {
       tree: [],
       openNodes: [],
       activeNodes: [],
-      search: null,
+      treeSearch: 'data',
       selectedSchema: null,
       // ## 3
       headers: [
@@ -584,14 +594,20 @@ export default {
         this.makeTemplate()
         this.generateSource()
       }
+      if (id === 4) {
+        this.saveToLocalStorage()
+      }
     },
     setError () {
       this.secondStepError = 'This is an error!'
     },
-    downloadAsFile () {
-      console.log('func is called!')
+    copyToClipSucc () {
+      this.openSnack(`생성된 ${this.selectedLang} 코드가 클립보드에 복사되었습니다.`)
     },
-    getNameInfo (name) {
+    copyToClipError () {
+      this.openSnack(`생성된 ${this.selectedLang} 코드를 복사하는 중 오류가 발생했습니다.`)
+    },
+    shorten (name) {
       const arr = name.split('.')
       let ret = ''
       let i = 0
@@ -599,7 +615,7 @@ export default {
         ret += arr[i].charAt(0) + '.'
       }
       ret += arr[i]
-      return { len: arr.length, show: ret }
+      return ret
     },
     getProps (thing, parent) {
       const name = thing.getName()
@@ -624,6 +640,7 @@ export default {
         const primitive = strTypes[0] in primitiveTypes
         const o = {
           name: name,
+          shortenName: this.shorten(name),
           nam: name,
           from: thing.getName(),
           desc: prop.getDescription(),
@@ -881,7 +898,7 @@ export default {
       var styleString = ''
 
       if (elem != null) {
-        console.log(elem)
+        // console.log(elem)
 
         if (maxHeight !== false) {
           styleString += 'height: ' + String(windowHeight - subVal) + 'px;'
@@ -932,15 +949,19 @@ export default {
         this.template)
       // this._conv(this.template, this.srcObject)
     },
+    saveToLocalStorage () {
+      // 로컬 스토리지에 저장하기
+      this.openSnack('작업 결과를 로컬스토리지에 저장했습니다.')
+    },
     getStaticHeight (elementId, subVal, maxHeight = false, overflow = false) {
       const windowHeight = this.windowHeight
       // console.log('window height ', windowHeight)
       // console.log('return ', windowHeight - subVal)
 
       // console.log('return obj ', { height: windowHeight - subVal + 'px' })
-      var elem = document.getElementById(elementId)
-      var styleString = ''
-      var styleObj = {}
+      const elem = document.getElementById(elementId)
+      let styleString = ''
+      const styleObj = {}
 
       if (elem != null) {
         console.log(elem)
@@ -983,10 +1004,7 @@ export default {
   computed: {
     filterNode () {
       return function (item, search, name) {
-        if (item[name].toLowerCase().indexOf(search.toLowerCase()) > -1) {
-          return true
-        }
-        return false
+        return item[name].toLowerCase().indexOf(search.toLowerCase()) > -1
       }
     },
     sdoNodes: function () {
