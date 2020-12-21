@@ -20,7 +20,7 @@
       <v-stepper-items>
         <v-stepper-content step="1">
           <v-card class="mb-12">
-            <v-textarea v-model="srcData" rows="15" id="srcData" height="100%"
+            <v-textarea v-model="srcData" rows="15" id="srcData" height="max-content"
             :style="getStaticHeight('srcData', 350, maxHeight=350)" class="mb-10"
             placeholder="여기에 JSON 데이터를 입력하세요.">
               {
@@ -138,7 +138,7 @@
           </v-container>
         </v-stepper-content>
         <v-stepper-content step="3">
-          <v-card class="mb-12" min-height="650px" height="75vh">
+          <v-card class="mb-12" min-height="min-content" height="max-content">
             <v-sheet class="lighten-1" v-if="activeClass">
               <v-container fluid>
                 <v-row no-gutters>
@@ -176,14 +176,14 @@
               <v-container class="pa-0" fluid>
                 <v-row class="pa-0" v-if="allProperties">
                   <v-col cols="8">
-                    <div id="propEdit"
-                    :style="getStaticHeight('propEdit', 450, maxHeight=450)">
+                    <div
+                      id="propEdit"
+                      :style="getStaticHeight('propEdit', 450, maxHeight=450)">
                       <v-data-table
                         :headers="headers"
                         :items="allProperties.allProps"
                         item-key="name"
                         class="elevation-1"
-                        height="100%"
                         hide-default-footer
                         disable-pagination
                         fixed-header
@@ -277,13 +277,18 @@
                             </div>
                             <div v-else>
                               <v-row align="start" justify="start">
-                                <v-btn @click="useLink(item)" icon
-                                       elevation="0"
-                                       :disabled="jsonSrcSelected.path.length === 0"
-                                ><v-icon>mdi-link-variant</v-icon></v-btn>
-                                <v-btn @click="editPrimitive(item)"
-                                       elevation="0"
-                                       icon><v-icon>mdi-pencil</v-icon></v-btn>
+                                <v-btn
+                                  @click="useLink(item)"
+                                  :disabled="jsonSrcSelected.path.length === 0"
+                                  elevation="0"
+                                  icon
+                                ><v-icon>mdi-link-variant</v-icon>
+                                </v-btn>
+                                <v-btn
+                                  @click="editPrimitive(item)"
+                                  elevation="0"
+                                  icon
+                                ><v-icon>mdi-pencil</v-icon></v-btn>
                               </v-row>
                             </div>
                           </div>
@@ -299,8 +304,9 @@
                     </div>
                   </v-col>
                   <v-col cols="4" class="pa-2" >
-                    <div class="jsonObj elevation-2 pa-2" id="propDetailList"
-                  :style="getStaticHeight('propDetailList', 420, maxHeight=420)">
+                    <div
+                      class="jsonObj elevation-2 pa-2" id="propDetailList"
+                      :style="getStaticHeight('propDetailList', 450, maxHeight=450)">
                       <vue-json-pretty
                         v-model="jsonSrcSelected.path"
                         :data="srcObject"
@@ -333,39 +339,61 @@
           </v-card>
         </v-stepper-content>
         <v-stepper-content step="4">
-          <v-card class="mb-12" height="650px">
+          <v-card class="mb-12" height="max-content">
             <v-card-text>
               <v-container>
                 <v-row>
                   <v-col cols="4" class="jsonObj elevation-1">
-                    <vue-json-pretty
-                      :data="template"
-                      :deep="4"></vue-json-pretty>
+                    <div
+                      id="srcTemplate"
+                      :style="getStaticHeight('srcTemplate', 450, 450)"
+                      >
+                      <vue-json-pretty
+                        :data="template"
+                        :deep="4"></vue-json-pretty>
+                    </div>
                   </v-col>
                   <v-col cols='4' class="jsonObj elevation-0">
-                    <vue-json-pretty class="jsonObj" :data="srcObject"
-                                     :deep="4"></vue-json-pretty>
+                    <div
+                      id="srcObject"
+                      :style="getStaticHeight('srcTemplate', 450, 450)"
+                    >
+                      <vue-json-pretty class="jsonObj" :data="srcObject"
+                                       :deep="4"></vue-json-pretty>
+                    </div>
                   </v-col>
                   <v-col cols="4" class="jsonObj elevation-3 overflow-auto">
-                    <pre>
-                      {{generatedSource}}
-                    </pre>
+                    <div
+                      id="genSource"
+                      :style="getStaticHeight('srcTemplate', 450, 450)">
+                      <pre>{{generatedSource}}</pre>
+                    </div>
                   </v-col>
                 </v-row>
               </v-container>
             </v-card-text>
             <v-card-actions>
-              <v-select
-                v-model="selectedLang"
-                :items="genLanguages"
-                label="Select Language"
-                return-object
-                dense
-                item-value="name"
-              ></v-select>
-              <v-btn raised @click="generateSource()">generate source</v-btn>
-              <v-btn raised @click="downloadAsFile()">save</v-btn>
-              <v-btn raised color="primary" @click="setDone(4)">Continue</v-btn>
+              <v-row no-gutters>
+                <v-col cols="2" class="pa-1">
+                  <v-select
+                    v-model="selectedLang"
+                    :items="genLanguages"
+                    label="Select Language"
+                    return-object
+                    dense
+                    item-value="name"
+                  ></v-select>
+                </v-col>
+                <v-col cols="2" class="pa-1">
+                  <v-btn raised @click="generateSource()">generate source</v-btn>
+                </v-col>
+                <v-col cols="1" class="pa-1">
+                  <v-btn raised @click="downloadAsFile()">save</v-btn>
+                </v-col>
+                <v-col cols="1" class="pa-1">
+                  <v-btn raised color="primary" @click="setDone(4)">Continue</v-btn>
+                </v-col>
+              </v-row>
             </v-card-actions>
           </v-card>
         </v-stepper-content>
@@ -394,7 +422,7 @@
 
 <script>
 import VueJsonPretty from 'vue-json-pretty'
-// import gen from '../lago-gen'
+import gen from '../lago-gen'
 const primitiveTypes = {
   Integer: undefined,
   Text: undefined,
@@ -553,7 +581,8 @@ export default {
         this.getAllProperties()
       }
       if (this.e1 === 4) {
-        this.template = this.makeTemplate()
+        this.makeTemplate()
+        this.generateSource()
       }
     },
     setError () {
@@ -774,18 +803,58 @@ export default {
         '@context': 'https://schema.org',
         '@type': active.getName()
       }
+      const putValue = (dest, obj) => {
+        if (obj.value.length > 0) {
+          if (obj.inputType === 'Number') {
+            dest[obj.nam] = Number.parseInt(obj.value)
+          } else {
+            dest[obj.nam] = obj.value
+          }
+        } else {
+          dest[obj.nam] = '{{' + obj.link + '}}'
+        }
+      }
 
-      // const putValue = (dest, obj) => {
-      //   if (obj.value.length > 0) {
-      //     if (obj.inputType === 'Number') {
-      //       dest[obj.nam] = Number.parseInt(obj.value)
-      //     } else {
-      //       dest[obj.nam] = obj.value
-      //     }
-      //   } else {
-      //     dest[obj.nam] = '{{' + obj.link + '}}'
-      //   }
-      // }
+      const findObject = (from, name) => {
+        // name = rootMember.sub1Member,sub2Member
+        // topDown 방식으로 만드는 거이 바람직합니다.
+        const paths = name.split('.')
+        let target = from
+        const schemaRoot = this.allProperties.allProps
+        let schemaArr = schemaRoot
+        for (const elem of paths) {
+          const idx = schemaArr.map(x => x.nam).indexOf(elem)
+          // 타입 이름을 가져올 수 있는 객체
+          const nextObj = schemaArr[idx]
+          if (nextObj.primitive) {
+            return target
+          }
+          if (target[elem] === undefined) {
+            // 찾으려고 하는 객체가 없는 경우, 여기서는 nam을 사용함.
+            target[elem] = {
+              '@type': nextObj.inputType
+            }
+          }
+          target = target[elem]
+          schemaArr = nextObj.subProps
+        }
+        // 최종적으로 발견된 객체
+        return target
+      }
+
+      this.allProperties.edited.forEach((v, k) => {
+        console.log('make template', k, v)
+        if (v.parent === null) {
+          console.log('make direct ...')
+          putValue(temp, v)
+          console.log('after v', temp, v)
+        } else {
+          putValue(findObject(temp, k), v)
+          console.log('after v subsub', temp, k, v)
+        }
+      })
+
+      console.log('after v subsub', temp)
       this.template = temp
     },
     setHeight (elementId, divisionRate) {
@@ -856,6 +925,12 @@ export default {
         console.log('getSchemaDescHeight is None')
         return 0
       }
+    },
+    generateSource () {
+      this.generatedSource = gen.generateSource(this.selectedLang,
+        this.activeClass.getName(),
+        this.template)
+      // this._conv(this.template, this.srcObject)
     },
     getStaticHeight (elementId, subVal, maxHeight = false, overflow = false) {
       const windowHeight = this.windowHeight
@@ -1014,7 +1089,7 @@ export default {
   }
 
   #propEdit {
-    min-height: 500px;
+    max-height: calc(100vh - 440px);
     overflow: auto;
   }
 
