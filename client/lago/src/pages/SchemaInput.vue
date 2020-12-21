@@ -217,7 +217,7 @@
                                   <input v-else-if="item.type==='Time'"
                                          type="time" v-model="item.value"/>
                                   <input v-else-if="item.type==='Boolean'"
-                                         type="checkbox" v-model="item.value"/>
+                                         type="checkbox" v-model="item.checked"/>
                                 </div>
                                 <v-btn icon @click="editDonePrimitive(item)">
                                   <v-icon>mdi-check-all</v-icon></v-btn>
@@ -235,7 +235,8 @@
                                        icon><v-icon>mdi-pencil</v-icon></v-btn>
                               </v-row>
                             </div>
-                            <div v-else-if="item.value.length > 0">
+                            <div
+                              v-else-if="item.value.length > 0 || item.checked !== undefined">
                               <v-row align="start" justify="start">
                                 <v-icon small color="green" >mdi-pencil</v-icon>
                                 <span class="sp">{{item.value}}</span>
@@ -300,7 +301,7 @@
             <v-card-actions>
               <v-btn
                 color="primary"
-                :disabled="editedSize == 0"
+                :disabled="editedSize === 0"
                 @click="setDone(3, 4)">Continue
               </v-btn>
               <v-btn text>Cancel</v-btn>
@@ -522,7 +523,7 @@ export default {
           this.srcObject = JSON.parse(this.srcData)
           if (this.srcObject !== null) {
             // console.log(this.srcData)
-            console.log(this.srcObject)
+            // console.log(this.srcObject)
             this.setDone(1, 2)
           } else {
             console.log('catch error!')
@@ -559,7 +560,7 @@ export default {
         console.log('setDone active', this.active)
         this.secondStepError = null
         if (this.step === 2) {
-          console.log(this.$sdo.sdoClasses)
+          // console.log(this.$sdo.sdoClasses)
         }
         if (this.step === 3) {
           this.getAllProperties()
@@ -570,9 +571,9 @@ export default {
         }
       }
     },
-    setError () {
-      this.secondStepError = 'This is an error!'
-    },
+    // setError () {
+    //   this.secondStepError = 'This is an error!'
+    // },
     copyToClipSucc () {
       this.openSnack(`생성된 ${this.selectedLang} 코드가 클립보드에 복사되었습니다.`)
     },
@@ -625,6 +626,7 @@ export default {
           // 데이터 입력
           editing: false,
           value: '',
+          checked: undefined,
           link: null,
           // 자식노드 관련
           primitive: primitive, // 기본값인가 여부
@@ -682,7 +684,7 @@ export default {
       const cls = [cl]
       while (cl !== null) {
         const clCategory = cl.getSuperClasses(false)
-        console.log(clCategory, clCategory.length)
+        // console.log(clCategory, clCategory.length)
         if (clCategory.length > 0) {
           cl = this.$sdo.sdo.getClass(clCategory[0])
           cls.push(cl)
@@ -704,19 +706,19 @@ export default {
         return
       }
       const idx = this.allProperties.allProps.map(x => x.name).indexOf(node.name)
-      console.log('node', node, idx)
+      // console.log('node', node, idx)
       this.allProperties.allProps.splice(idx + 1, this.getAllSubNodeCount(node))
       node.expanded = false
     },
     expand (node) {
       const idx = this.allProperties.allProps.map(x => x.name).indexOf(node.name)
-      console.log('node', node, idx)
+      // console.log('node', node, idx)
       if (node.subProps === null) {
         this.expandSubNodes(node)
       }
       this.allProperties.allProps.splice(idx + 1, 0, ...node.subProps)
-      const idx2 = this.allProperties.allProps.map(x => x.name).indexOf(node.name)
-      console.log('node', node, idx2)
+      // this.allProperties.allProps.map(x => x.name).indexOf(node.name)
+      // console.log('node', node, idx2)
       node.expanded = true
     },
     editOrLinkItem (item, add = true) {
@@ -758,7 +760,7 @@ export default {
       }
       item.link = null
       item.editing = false
-      this.editOrLinkItem(item, item.value.length > 0)
+      this.editOrLinkItem(item, item.value.length > 0 || item.checked !== undefined)
     },
     isPrimitive (type) {
       return type in primitiveTypes
@@ -783,7 +785,7 @@ export default {
       }
       return false
     },
-    printSelected (path, data, treeName = '') {
+    printSelected (path, data, _) {
       const paths = path.split('.')
       this.jsonSrcSelected.path = path
       this.jsonSrcSelected.name = paths[paths.length - 1]
@@ -801,11 +803,17 @@ export default {
       }
       const putValue = (dest, obj) => {
         if (obj.value.length > 0) {
-          if (obj.inputType === 'Number') {
-            dest[obj.nam] = Number.parseInt(obj.value)
-          } else {
-            dest[obj.nam] = obj.value
+          switch (obj.inputType) {
+            case 'Number':
+            case 'Integer':
+              dest[obj.nam] = Number.parseInt(obj.value)
+              break
+            default:
+              dest[obj.nam] = obj.value
+              break
           }
+        } else if (obj.checked !== undefined) {
+          dest[obj.nam] = obj.checked
         } else {
           dest[obj.nam] = '{{' + obj.link + '}}'
         }
@@ -816,8 +824,7 @@ export default {
         // topDown 방식으로 만드는 거이 바람직합니다.
         const paths = name.split('.')
         let target = from
-        const schemaRoot = this.allProperties.allProps
-        let schemaArr = schemaRoot
+        let schemaArr = this.allProperties.allProps
         for (const elem of paths) {
           const idx = schemaArr.map(x => x.nam).indexOf(elem)
           // 타입 이름을 가져올 수 있는 객체
@@ -839,42 +846,42 @@ export default {
       }
 
       this.editedProps.forEach((v) => {
-        console.log('make template', v)
+        // console.log('make template', v)
         if (v.parent === null) {
-          console.log('make direct ...')
+          // console.log('make direct ...')
           putValue(temp, v)
-          console.log('after v', temp, v)
+          // console.log('after v', temp, v)
         } else {
           putValue(findObject(temp, v.name), v)
-          console.log('after v subsub', temp, v.name, v)
+          // console.log('after v subsub', temp, v.name, v)
         }
       })
 
       console.log('after v subsub', temp)
       this.template = temp
     },
-    setHeight (elementId, divisionRate) {
-      const windowHeight = this.windowHeight
-      // console.log('onLoad () window height ', windowHeight)
-      // console.log(' onLoad () return ', windowHeight * divisionRate)
-
-      var elem = document.getElementById(elementId)
-      if (elem != null) {
-        console.log(elem)
-        elem.style = 'height: ' + windowHeight * divisionRate + 'px'
-        // console.log('onLoad () set ' + elementId)
-      } else {
-        // console.log('onLoad () ' + elementId + ' is null')
-      }
-    },
+    // setHeight (elementId, divisionRate) {
+    //   const windowHeight = this.windowHeight
+    //   // console.log('onLoad () window height ', windowHeight)
+    //   // console.log(' onLoad () return ', windowHeight * divisionRate)
+    //
+    //   const elem = document.getElementById(elementId)
+    //   if (elem != null) {
+    //     // console.log(elem)
+    //     elem.style.height = windowHeight * divisionRate + 'px'
+    //     // console.log('onLoad () set ' + elementId)
+    //   } else {
+    //     // console.log('onLoad () ' + elementId + ' is null')
+    //   }
+    // },
     setStaticHeight (elementId, subVal, maxHeight = false, overflow = false) {
       const windowHeight = this.windowHeight
       // console.log('window height ', windowHeight)
       // console.log('return ', windowHeight - subVal)
 
       // console.log('return obj ', { height: windowHeight - subVal + 'px' })
-      var elem = document.getElementById(elementId)
-      var styleString = ''
+      const elem = document.getElementById(elementId)
+      let styleString = ''
 
       if (elem != null) {
         // console.log(elem)
@@ -895,23 +902,23 @@ export default {
         // console.log(elementId + ' is null')
       }
     },
-    getHeight (elementId, divisionRate) {
-      const windowHeight = this.windowHeight
-      // console.log('window height ', windowHeight)
-      // console.log('return ', windowHeight * divisionRate)
-
-      // console.log('return obj ', { height: windowHeight * divisionRate + 'px' })
-      var elem = document.getElementById(elementId)
-      if (elem != null) {
-        // console.log(elem)
-        elem.style = 'height: ' + windowHeight * divisionRate + 'px'
-        // console.log('set ' + elementId)
-      } else {
-        // console.log(elementId + ' is null')
-      }
-
-      return { height: windowHeight * divisionRate + 'px' }
-    },
+    // getHeight (elementId, divisionRate) {
+    //   const windowHeight = this.windowHeight
+    //   // console.log('window height ', windowHeight)
+    //   // console.log('return ', windowHeight * divisionRate)
+    //
+    //   // console.log('return obj ', { height: windowHeight * divisionRate + 'px' })
+    //   const elem = document.getElementById(elementId)
+    //   if (elem != null) {
+    //     // console.log(elem)
+    //     elem.style.height = windowHeight * divisionRate + 'px'
+    //     // console.log('set ' + elementId)
+    //   } else {
+    //     // console.log(elementId + ' is null')
+    //   }
+    //
+    //   return { height: windowHeight * divisionRate + 'px' }
+    // },
     getSchemaDescHeight () {
       const propDOM = this.$refs.shcemaInputDesc
       if (propDOM != null) {
@@ -1015,8 +1022,7 @@ export default {
       }
       const treeNodes = []
       const thing = this.$sdo.sdo.getClass('schema:Thing')
-      const thingNode = addNodeAtRoot(treeNodes, thing.getIRI(true), thing)
-      console.log('full tree', treeNodes, thingNode)
+      addNodeAtRoot(treeNodes, thing.getIRI(true), thing)
       return treeNodes
     },
     activeClass () {
@@ -1033,7 +1039,7 @@ export default {
         let cl = active
         while (cl !== null) {
           const clCategory = cl.getSuperClasses(false)
-          console.log(clCategory, clCategory.length)
+          // console.log(clCategory, clCategory.length)
           if (clCategory.length > 0) {
             cl = this.$sdo.sdo.getClass(clCategory[0])
             cls.push(cl)
@@ -1056,7 +1062,8 @@ export default {
       return this.editedProps.filter(x => x.link != null).length
     },
     editedItems () {
-      return this.editedProps.filter(x => x.value.length > 0).length
+      return this.editedProps.filter(
+        x => x.value.length > 0 || x.checked !== undefined).length
     }
   }
 }
@@ -1139,7 +1146,7 @@ export default {
         position: relative;
 
         input:focus {
-          outline-offset: 0px;
+          outline-offset: 0;
           outline: none;
         }
 
@@ -1150,14 +1157,14 @@ export default {
           letter-spacing: normal;
           word-spacing: normal;
           text-transform: none;
-          text-indent: 0px;
+          text-indent: 0;
           text-shadow: none;
           display: inline-block;
           text-align: start;
           background-color: rgb(255, 255, 255);
           -webkit-rtl-ordering: logical;
           cursor: text;
-          margin: 0em;
+          margin: 0;
           font: 400 13.3333px Arial;
           padding: 1px 2px;
           /*border-width: 2px;*/
@@ -1171,7 +1178,7 @@ export default {
           flex: 1 1 auto;
           line-height: 16px;
           max-width: 70%;
-          min-width: 0px;
+          min-width: 0;
           width: 70%;
           cursor: text;
         }
@@ -1180,7 +1187,7 @@ export default {
   }
 
   .indent-0 {
-    padding-left: 0px;
+    padding-left: 0;
   }
 
   .indent-1 {
@@ -1263,6 +1270,6 @@ export default {
     color: navy;
   }
   .normal-check {
-    margin-top:0px !important;
+    margin-top:0 !important;
   }
 </style>
