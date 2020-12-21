@@ -151,7 +151,7 @@
                 <v-row no-gutters>
                   <label>전체 편집</label>
                   <v-chip label class="ma-1">
-                    {{allProperties.edited.size}}</v-chip>
+                    {{editedProps.size}}</v-chip>
                   <label> 입력 소스와 연결: </label>
                   <v-chip class="ma-1" label>{{linkedItems}}</v-chip>
                   <label> 직접 편집: </label>
@@ -331,7 +331,7 @@
             <v-card-actions>
               <v-btn
                 color="primary"
-                :disabled="allProperties.edited.size == 0"
+                :disabled="editedProps.size == 0"
                 @click="setDone(3, 4)">Continue
               </v-btn>
               <v-btn text>Cancel</v-btn>
@@ -343,12 +343,16 @@
             <v-card-text>
               <v-container>
                 <v-row>
+                  <v-col><span>변환 템플릿</span></v-col>
+                  <v-col><span>입력 소스 데이터</span></v-col>
+                  <v-col><span>생성된 {{selectedLang}} 코드</span></v-col>
+                </v-row>
+                <v-row>
                   <v-col cols="4" class="jsonObj elevation-1">
                     <div
                       id="srcTemplate"
                       :style="getStaticHeight('srcTemplate', 450, 450)"
                       >
-                      <span>변환 템플릿</span>
                       <vue-json-pretty
                         :data="template"
                         :deep="4"></vue-json-pretty>
@@ -359,7 +363,6 @@
                       id="srcObject"
                       :style="getStaticHeight('srcObject', 450, 450)"
                     >
-                      <span>입력 소스 데이터</span>
                       <vue-json-pretty class="jsonObj" :data="srcObject"
                                        :deep="4"></vue-json-pretty>
                     </div>
@@ -368,7 +371,6 @@
                     <div
                       id="genSource"
                       :style="getStaticHeight('genSource', 450, 450)">
-                      <span>생성된 {{selectedLang}} 코드</span>
                       <pre>{{generatedSource}}</pre>
                     </div>
                   </v-col>
@@ -512,9 +514,9 @@ export default {
       allProperties: {
         allProps: [],
         props: {},
-        edited: new Map(),
         editingItem: null
       },
+      editedProps: new Map(),
       jsonSelect: {
         value: 'res.error',
         selectableType: 'single',
@@ -640,7 +642,7 @@ export default {
         const primitive = strTypes[0] in primitiveTypes
         const o = {
           name: name,
-          shortenName: this.shorten(name),
+          shortenName: name,
           nam: name,
           from: thing.getName(),
           desc: prop.getDescription(),
@@ -666,6 +668,7 @@ export default {
         // 서브 페이지를 만들기 위해서 사용하는 자기를 다시 가리키는 변수
         if (parent !== undefined) {
           o.name = parent.name + '.' + o.name
+          o.shortenName = this.shorten(o.name)
           o.depth = parent.depth + 1
           o.parent = parent
         }
@@ -748,9 +751,9 @@ export default {
     },
     editOrLinkItem (item, add = true) {
       if (add) {
-        this.allProperties.edited.set(item.name, item)
+        this.editedProps.set(item.name, item)
       } else {
-        this.allProperties.edited.delete(item.name)
+        this.editedProps.delete(item.name)
       }
     },
     useLink (item) {
@@ -859,7 +862,7 @@ export default {
         return target
       }
 
-      this.allProperties.edited.forEach((v, k) => {
+      this.editedProps.forEach((v, k) => {
         console.log('make template', k, v)
         if (v.parent === null) {
           console.log('make direct ...')
@@ -1070,9 +1073,12 @@ export default {
     inputItemSearch () {
       return this.jsonSrcSelected.enabled ? this.jsonSrcSelected.path : ''
     },
+    editedSize () {
+      return this.editedProps.size
+    },
     linkedItems () {
       let cnt = 0
-      this.allProperties.edited.forEach((k, v) => {
+      this.editedProps.forEach((k, v) => {
         console.log('linked items', k, v)
         if (v.link != null) { cnt++ }
       })
@@ -1080,7 +1086,7 @@ export default {
     },
     editedItems () {
       let cnt = 0
-      this.allProperties.edited.forEach((k, v) => {
+      this.editedProps.forEach((k, v) => {
         console.log('editedItems items', k, v)
         if (v.value.length > 0) { cnt++ }
       })
