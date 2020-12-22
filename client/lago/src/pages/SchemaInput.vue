@@ -107,7 +107,7 @@
           </v-container>
         </v-stepper-content>
         <v-stepper-content step="3">
-          <v-card class="mb-12" min-height="min-content" height="max-content">
+          <v-card class="mb-0" min-height="min-content" height="max-content">
             <v-sheet class="lighten-1" v-if="activeClass">
               <v-container fluid>
                 <v-row no-gutters>
@@ -118,15 +118,15 @@
                        :href="cl.getIRI()">{{cl.getName()}}</a> </v-chip>
                 </v-row>
                 <v-row no-gutters>
-                  <label>전체 편집</label>
+                  <label class="schemaInputUpperLabel">전체 편집</label>
                   <v-chip label class="ma-1">
                     {{editedSize}}</v-chip>
-                  <label> 입력 소스와 연결: </label>
+                  <label class="schemaInputUpperLabel"> 입력 소스와 연결: </label>
                   <v-chip class="ma-1" label>{{linkedItems}}</v-chip>
-                  <label> 직접 편집: </label>
+                  <label class="schemaInputUpperLabel"> 직접 편집: </label>
                   <v-chip class="ma-1" label>{{editedItems}}</v-chip>
                   <v-btn @click="makeTemplate" >생성</v-btn>
-                  <v-col>
+                  <v-col class="schemaInputUpperLabel">
                     <v-checkbox :hide-details="true" class="normal-check"
                       dense v-model="jsonSrcSelected.enabled"
                     >
@@ -141,7 +141,7 @@
                 </v-row>
               </v-container>
             </v-sheet>
-            <v-card-text>
+            <v-card-text class="mt-0 mb-0 pb-0">
               <v-container class="pa-0" fluid>
                 <v-row class="pa-0" v-if="allProperties">
                   <v-col cols="8">
@@ -967,7 +967,7 @@ export default {
         } else {
         }
         elem.style = styleString
-        // console.log('set ' + elementId + '=' + styleString)
+        console.log('set ' + elementId + '=' + styleString)
         return styleObj
       } else {
         // console.log(elementId + ' is null')
@@ -1271,5 +1271,9 @@ export default {
   }
   .normal-check {
     margin-top:0 !important;
+  }
+  .schemaInputUpperLabel {
+    display: flex;
+    align-items: center;
   }
 </style>
