@@ -19,14 +19,21 @@
       </v-stepper-header>
       <v-stepper-items>
         <v-stepper-content step="1">
-          <v-card class="mb-12">
-            <v-textarea v-model="srcData" rows="15" id="srcData" height="max-content"
-            :style="getStaticHeight('srcData', 350, maxHeight=350)" class="mb-10"
-            placeholder="JSON.stringify(srcData)">
-            </v-textarea>
-            <v-content v-if="firstStepError"><p>{{firstStepError}}</p></v-content>
-            <v-btn raised elevation="2" primary @click="loadJson()">Continue</v-btn>
-          </v-card>
+          <v-container fluid>
+            <v-row class="firstStepperContent">
+              <v-col cols="12" class="d-flex" style="flex-direction:column;">
+                <v-card class="firstCard">
+                  <v-textarea v-model="srcData" class="srcDataClass"
+                  placeholder="JSON.stringify(srcData)">
+                  </v-textarea>
+                  <v-content v-if="firstStepError"><p>{{firstStepError}}</p></v-content>
+                </v-card>
+                <v-card class="seoncdCard">
+                  <v-btn raised elevation="2" primary @click="loadJson()">Continue</v-btn>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-container>
         </v-stepper-content>
         <v-stepper-content step="2">
           <v-container class="pa-0" fluid >
@@ -977,10 +984,10 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
-      this.setStaticHeight('srcData', 350, 350)
-      this.setStaticHeight('schemaInputWrapper', 300)
-      this.setStaticHeight('treeView', 450, 450)
-      this.setStaticHeight('schemdaInputJsonObj', 550, 550)
+      // this.setStaticHeight('srcData', 350, 350)
+      // this.setStaticHeight('schemaInputWrapper', 300)
+      // this.setStaticHeight('treeView', 450, 450)
+      // this.setStaticHeight('schemdaInputJsonObj', 550, 550)
       window.addEventListener('resize', this.onResize)
     })
   },
@@ -1275,5 +1282,37 @@ export default {
   .schemaInputUpperLabel {
     display: flex;
     align-items: center;
+  }
+  .firstStepperContent {
+    height: calc(100vh - 300px);
+    padding-bottom: 20px;
+  }
+  .fisrtStepperContainer {
+    display: flex;
+    flex: 1 !important;
+    flex-direction: column;
+  }
+  .firstCard {
+    display: flex;
+    flex: 3;
+  }
+  .secondCard {
+    display: flex;
+    flex: 1;
+    background-color: red;
+  }
+  .srcDataClass {
+    height: 200px;
+    min-height: 400px !important;
+    // display: flex;
+    // flex: 1;
+    // background-color: red;
+    .v-input__slot{
+      min-height: 400px !important;
+      .v-text-field__slot{
+        height: 400px !important;
+        min-height: 400px !important;
+      }
+    }
   }
 </style>
