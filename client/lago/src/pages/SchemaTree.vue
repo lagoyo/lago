@@ -1,10 +1,9 @@
 <template>
-  <v-container fluid >
+  <v-container class="pa-4" fluid >
     <v-row>
       <v-col cols="4">
         <v-card
           class="mx-auto"
-          max-width="500"
         >
           <v-sheet class="pa-4 primary lighten-2">
             <v-text-field
@@ -18,7 +17,7 @@
               clear-icon="mdi-close-circle-outline"
             ></v-text-field>
           </v-sheet>
-          <v-card-text id="treeView">
+          <v-card-text class="pa-1" id="treeView">
             <v-treeview
               :items="sdoNodes"
               itemKey="iri"
@@ -50,15 +49,15 @@
 <!--        <p>Tree:{{tree}}</p>-->
 <!--        <p>Active: {{activeNodes}}</p>-->
 <!--        <p>Seach: {{search}}</p>-->
-        <v-card v-if="activeClass">
+        <v-card v-if="activeClass" class="schematreePropWrapper">
           <v-sheet class="pa-4 accent lighten-1" ref="schemaPropName">
             <span class="font-weight-bold">{{activeClass.getName()}}</span>
             <a class="pa-10" :target="activeClass.getName()" :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
           </v-sheet>
-          <v-card-subtitle ref="schemaPropDesc">
+          <v-card-subtitle ref="schemaPropDesc" id="schemaPropDesc">
             <p><span v-html="activeClass.getDescription()"></span></p>
           </v-card-subtitle>
-          <v-card-text>
+          <v-card-text class="pa-0" id="schemaPropView">
             <div class="text-left">
               <v-chip
                 class="ma-2"
@@ -70,7 +69,6 @@
                 :key="cl.getName()"
               >{{cl.getName()}}</v-chip>
             </div>
-            <div id="propView">
             <v-data-table
               v-show="propKey === cl.getName()"
               v-for="cl of superClasses"
@@ -81,7 +79,7 @@
               group-by="from"
               hide-default-footer
               hide-default-header
-              class="elevation-5"
+              class="elevation-5 propView"
             >
               <template v-slot:item.type="{ item }">
                 <p v-html="item.type"/>
@@ -90,7 +88,6 @@
                 <p v-html="item.desc"/>
               </template>
             </v-data-table>
-            </div>
           </v-card-text>
         </v-card>
         <v-card v-else>
@@ -347,12 +344,29 @@ export default {
 </script>
 
 <style scoped lang="scss">
+  .schematreePropWrapper {
+    height: calc(100vh - 200px);
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
   #treeView {
-    height: calc(100vh - 300px);
+    height: calc(100vh - 280px);
     overflow: auto;
   }
-  #propView {
-    height: calc(100vh - 430px);
+  .propView {
+    height: 100%;
     overflow: auto;
+  }
+  #schemaPropDesc {
+    display: flex;
+    flex: 1;
+    overflow: auto;
+  }
+  #schemaPropView {
+    display: flex;
+    flex: 7;
+    overflow: auto;
+    flex-direction: column;
   }
 </style>

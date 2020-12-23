@@ -1,11 +1,43 @@
 #schemdaInputJsonObj {
-    height: calc(100vh - 450px) !important;
+    
 }
+
+.srcDataClass {
+    display: flex;
+    flex: 1;
+}
+
+.srcDataClass 
+.v-input__control 
+.v-input__slot .v-text-field__slot{
+    height: calc(100vh - 360px) !important;
+}
+
+.srcDataClass 
+.v-input__control 
+.v-input__slot .v-text-field__slot textarea{
+    /* display: flex;
+    flex: 1; */
+    height: 100% !important;
+    /* max-height: 100% !important; */
+}
+/* .v-input__control {
+    .v-input__slot{
+      .v-text-field__slot{
+        textarea {      
+      }
+    }
+  }
+ } */
 .schemaBrowserScroll{
     height: calc(100vh - 350px) !important;
 }
 .secondSchemaDirectory{
 
+}
+
+.fourthStepperJS {
+    box-shadow: none !important;
 }
 .indent-bg-0 {
 }

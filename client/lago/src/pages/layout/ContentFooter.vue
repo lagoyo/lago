@@ -18,10 +18,10 @@
           </li>
         </ul>
       </nav>
-      <div class="copyright text-center">
-        &copy; {{ new Date().getFullYear() }}
-        <a href="https://github.com/lagoyo/lago" target="github-lago">LAGO Project</a
-        >, made with <i class="fa fa-heart heart"></i> for a collaborative data.
+      <div class="copyright">
+          &copy; {{ new Date().getFullYear() }}
+          <a href="https://github.com/lagoyo/lago" target="github-lago">LAGO Project</a
+          >, made with <i class="fa fa-heart heart"></i> for a collaborative data.
       </div>
     </div>
   </div>
@@ -32,18 +32,12 @@ export default {}
 <style scoped lang="scss">
   .footer {
     padding: 0;
-    margin: 0;
+
     .container {
       padding-right: 30px;
       padding-left: 30px;
       padding: 0;
       display: flex;
-      justify-content: space-between;
-
-      nav,
-      .copyright {
-        display: inline-block;
-      }
 
       ul {
         padding: 0;
@@ -71,12 +65,9 @@ export default {}
           }
         }
       }
-
       .copyright {
         padding-right: 10px;
         padding-left: 10px;
-        margin: 0;
-
         .material-icons {
           font-size: 18px;
           position: relative;

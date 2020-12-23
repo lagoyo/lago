@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-stepper v-model="step">
+    <v-stepper v-model="step" class="elevation-0">
       <v-stepper-header>
         <v-stepper-step id="first" :complete="step > 1" step="1">
           샘플 데이터 입력하기
@@ -20,28 +20,25 @@
       <v-stepper-items>
         <v-stepper-content step="1">
           <v-container fluid>
-            <v-row class="firstStepperContent">
-              <v-col cols="12" class="d-flex" style="flex-direction:column;">
-                <v-card class="firstCard">
-                  <v-textarea v-model="srcData" class="srcDataClass"
+            <v-row>
+              <v-col cols="12">
+                <v-card elevation="0">
+                  <v-textarea v-model="srcData" class="srcDataClass" rows="auto"
                   placeholder="JSON.stringify(srcData)">
                   </v-textarea>
                   <v-content v-if="firstStepError"><p>{{firstStepError}}</p></v-content>
                 </v-card>
-                <v-card class="seoncdCard">
-                  <v-btn raised elevation="2" primary @click="loadJson()">Continue</v-btn>
-                </v-card>
+                <v-btn width="130px" raised elevation="2" primary @click="loadJson()">Continue</v-btn>
               </v-col>
             </v-row>
           </v-container>
         </v-stepper-content>
         <v-stepper-content step="2">
           <v-container class="pa-0" fluid >
-            <v-row class="pa-0">
-              <v-col cols="6" class="pa-0">
+            <v-row class="pa-0 secondStepperContent">
+              <v-col cols="6" class="pa-3">
                 <v-card
-                  class="mx-auto"
-                  max-width="700"
+                  class="mx-auto secondStepperTreeView mb-0 pb-0"
                 >
                   <v-sheet class="pa-2 primary lighten-2">
                     <v-text-field
@@ -55,8 +52,8 @@
                       clear-icon="mdi-close-circle-outline"
                     ></v-text-field>
                   </v-sheet>
-                  <v-card-text id="treeView"
-                  :style="getStaticHeight('treeView', 480 + getSchemaDescHeight(), 480 + getSchemaDescHeight())">
+                  <v-card-text id="treeView" class="pb-0"
+                  >
                     <v-treeview
                       :items="sdoNodes"
                       itemKey="iri"
@@ -70,7 +67,6 @@
                       dense
                       hoverable
                       activatable
-                      @update:active="setStaticHeight('treeView', 500, maxHeight=500)"
                       color="warning">
                       <template v-slot:prepend="{ item, open, active }">
                         <v-icon v-if="item.children">
@@ -85,25 +81,34 @@
                 </v-card>
               </v-col>
               <v-col cols="6" >
-                <vue-json-pretty
-                  class="jsonObj" :data="srcObject"
-                  id="schemdaInputJsonObj"
-                  :style="getStaticHeight('schemdaInputJsonObj', 430 + getSchemaDescHeight(), 430 + getSchemaDescHeight())"
-                  :deep="4"></vue-json-pretty>
+                <v-card class="secondStepperJsonObj">
+                  <v-card v-if="activeClass" class="secondStepperJsonObjTitle">
+                    <v-sheet class="pa-2 lighten-1" color="orange">
+                      <v-card class="pa-3 lighten-2" color="orange" elevation=0>
+                        <span class="font-weight-bold" style="align-items:center;">{{activeClass.getName()}}</span>
+                        <a class="pa-2" :target="activeClass.getName()"
+                          color="rgba(0, 0, 255, 0.9)"
+                            :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
+                          <span v-html="activeClass.getDescription()"></span>
+                      </v-card>
+                    </v-sheet>
+                  </v-card>
+                  <div v-else class="secondStepperJsonObjTitle">
+                    <v-sheet class="pa-2 lighten-1" color="orange">
+                      <v-card class="pa-3 lighten-2" color="orange" elevation=0>
+                      왼쪽의 트리에서 스키마를 선택해주세요.
+                      </v-card>
+                    </v-sheet>
+                  </div>
+                  <v-card class="pl-4 pt-4 secondStepperJsonObjDataWrapper" elevation="0">
+                    <vue-json-pretty
+                      class="jsonObj secondStepperJsonObjData" :data="srcObject"
+                      :deep="4"></vue-json-pretty>
+                  </v-card>
+                </v-card>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="12" ref="shcemaInputDesc">
-                <v-card v-if="activeClass">
-                  <v-sheet class="pa-2 lighten-1">
-                    <span class="font-weight-bold">{{activeClass.getName()}}</span>
-                    <a class="pa-2" :target="activeClass.getName()"
-                       :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
-                    <span v-html="activeClass.getDescription()"></span>
-                  </v-sheet>
-                </v-card>
-                <div v-else>위에서 스키마를 선택해주세요.</div>
-              </v-col>
               <v-col>
                 <v-btn raised color="primary" :disabled="activeClass === null"
                  @click="setDone(2, 3)">Continue
@@ -114,47 +119,55 @@
           </v-container>
         </v-stepper-content>
         <v-stepper-content step="3">
-          <v-card class="mb-0" min-height="min-content" height="max-content">
+          <v-card class="mb-0 thirdStepperWrapper" min-height="min-content" height="max-content"
+          >
             <v-sheet class="lighten-1" v-if="activeClass">
-              <v-container fluid>
-                <v-row no-gutters>
-                  <v-chip label class="ma-1"
-                          v-for="cl of superClasses"
-                          v-bind:key="cl.getName()"
-                  > <a :target="activeClass.getName()"
-                       :href="cl.getIRI()">{{cl.getName()}}</a> </v-chip>
-                </v-row>
-                <v-row no-gutters>
-                  <label class="schemaInputUpperLabel">전체 편집</label>
-                  <v-chip label class="ma-1">
-                    {{editedSize}}</v-chip>
-                  <label class="schemaInputUpperLabel"> 입력 소스와 연결: </label>
-                  <v-chip class="ma-1" label>{{linkedItems}}</v-chip>
-                  <label class="schemaInputUpperLabel"> 직접 편집: </label>
-                  <v-chip class="ma-1" label>{{editedItems}}</v-chip>
-                  <v-btn @click="makeTemplate" >생성</v-btn>
-                  <v-col class="schemaInputUpperLabel">
-                    <v-checkbox :hide-details="true" class="normal-check"
-                      dense v-model="jsonSrcSelected.enabled"
-                    >
-                      <template v-slot:label>
-                        <div>소스 데이터의 필드 이름으로 검색
-                          <span class="srcLink">
-                            {{jsonSrcSelected.path.substring(1)}}</span>
-                        </div>
-                      </template>
-                    </v-checkbox>
-                  </v-col>
-                </v-row>
-              </v-container>
+              <v-card class="grey lighten-3 thirdStepperMenu" elevation="1">
+                <v-container fluid>
+                  <v-row no-gutters>
+                    <v-col cols="3" class="text-center">
+                      <v-chip label class="ma-1"
+                              v-for="cl of superClasses"
+                              v-bind:key="cl.getName()"
+                      > <a :target="activeClass.getName()"
+                          :href="cl.getIRI()">{{cl.getName()}}</a> </v-chip>
+                    </v-col>
+                    <v-col class="d-flex justify-center" flex-direction="row">
+                      <label class="schemaInputUpperLabel">전체 편집
+                        <v-chip label class="ma-1">
+                        {{editedSize}}</v-chip></label>
+                      <label class="schemaInputUpperLabel"> 입력 소스와 연결:
+                        <v-chip class="ma-1" label>{{linkedItems}}</v-chip></label>
+                      <label class="schemaInputUpperLabel"> 직접 편집:
+                        <v-chip class="ma-1" label>{{editedItems}}</v-chip></label>
+                    </v-col>
+                    <v-col cols="1" class="schemaInputUpperLabel">
+                      <v-btn @click="makeTemplate" >생성</v-btn>
+                    </v-col>
+                    <v-col cols="3" class="schemaInputUpperLabel  justify-center">
+                      <v-checkbox :hide-details="true" class="normal-check"
+                        dense v-model="jsonSrcSelected.enabled"
+                      >
+                        <template v-slot:label>
+                          <div>소스 데이터의 필드 이름으로 검색
+                            <span class="srcLink">
+                              {{jsonSrcSelected.path.substring(1)}}</span>
+                          </div>
+                        </template>
+                      </v-checkbox>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card>
             </v-sheet>
-            <v-card-text class="mt-0 mb-0 pb-0">
+            <v-card-text class="mt-0 mb-0 pb-0 thirdStepperBody">
               <v-container class="pa-0" fluid>
                 <v-row class="pa-0" v-if="allProperties">
-                  <v-col cols="8">
+                  <v-col cols="8" class="pa-2">
+                    <v-card style="display: flex; flex: 1; flex-direction:column;">
                     <div
                       id="propEdit"
-                      :style="getStaticHeight('propEdit', 450, maxHeight=450)">
+                      >
                       <v-data-table
                         :headers="headers"
                         :items="allProperties.allProps"
@@ -279,28 +292,31 @@
                         </template>
                       </v-data-table>
                     </div>
+                    </v-card>
                   </v-col>
-                  <v-col cols="4" class="pa-2" >
-                    <div
-                      class="jsonObj elevation-2 pa-2" id="propDetailList"
-                      :style="getStaticHeight('propDetailList', 450, maxHeight=450)">
-                      <vue-json-pretty
-                        v-model="jsonSrcSelected.path"
-                        :data="srcObject"
-                        :path="jsonSelect.path"
-                        :show-double-quotes="jsonSelect.showDoubleQuotes"
-                        :highlight-mouseover-node="jsonSelect.highlightMouseoverNode"
-                        :highlight-selected-node="jsonSelect.highlightSelectedNode"
-                        :show-length="jsonSelect.showLength"
-                        :show-line="jsonSelect.showLine"
-                        :select-on-click-node="jsonSelect.selectOnClickNode"
-                        :collapsed-on-click-brackets="jsonSelect.collapsedOnClickBrackets"
-                        :path-selectable="((path, data) => (path.length > 0))"
-                        :selectable-type="jsonSelect.selectableType"
-                        :show-select-controller="jsonSelect.showSelectController"
-                        @click="printSelected(...arguments, 'CLICK')"
-                      ></vue-json-pretty>
-                    </div>
+                  <v-col cols="4" class="pa-2">
+                    <v-card >
+                      <div
+                        class="jsonObj elevation-2 pa-2" id="propDetailList"
+                        >
+                        <vue-json-pretty
+                          v-model="jsonSrcSelected.path"
+                          :data="srcObject"
+                          :path="jsonSelect.path"
+                          :show-double-quotes="jsonSelect.showDoubleQuotes"
+                          :highlight-mouseover-node="jsonSelect.highlightMouseoverNode"
+                          :highlight-selected-node="jsonSelect.highlightSelectedNode"
+                          :show-length="jsonSelect.showLength"
+                          :show-line="jsonSelect.showLine"
+                          :select-on-click-node="jsonSelect.selectOnClickNode"
+                          :collapsed-on-click-brackets="jsonSelect.collapsedOnClickBrackets"
+                          :path-selectable="((path, data) => (path.length > 0))"
+                          :selectable-type="jsonSelect.selectableType"
+                          :show-select-controller="jsonSelect.showSelectController"
+                          @click="printSelected(...arguments, 'CLICK')"
+                        ></vue-json-pretty>
+                      </div>
+                    </v-card>
                   </v-col>
                 </v-row>
               </v-container>
@@ -317,46 +333,44 @@
         </v-stepper-content>
         <v-stepper-content step="4">
           <v-card class="mb-12" height="max-content">
-            <v-card-text>
-              <v-container>
+            <v-card-text class="pb-0">
+              <v-container fluid>
                 <v-row>
                   <v-col><span>변환 템플릿</span></v-col>
                   <v-col><span>입력 소스 데이터</span></v-col>
                   <v-col><span>생성된 {{selectedLang}} 코드</span></v-col>
                 </v-row>
                 <v-row>
-                  <v-col cols="4" class="jsonObj elevation-1">
+                  <v-col cols="4" class="jsonObj fourthStepperObj elevation-1 pa-2">
                     <div
                       id="srcTemplate"
-                      :style="getStaticHeight('srcTemplate', 450, 450)"
                       >
                       <vue-json-pretty
                         :data="template"
                         :deep="4"></vue-json-pretty>
                     </div>
                   </v-col>
-                  <v-col cols='4' class="jsonObj elevation-0">
+                  <v-col cols='4' class="jsonObj fourthStepperObj elevation-1 pa-2">
                     <div
                       id="srcObject"
-                      :style="getStaticHeight('srcObject', 450, 450)"
                     >
                       <vue-json-pretty class="jsonObj" :data="srcObject"
                                        :deep="4"></vue-json-pretty>
                     </div>
                   </v-col>
-                  <v-col cols="4" class="jsonObj elevation-3 overflow-auto">
+                  <v-col cols="4" class="jsonObj fourthStepperObj elevation-1 pa-2">
                     <div
                       id="genSource"
-                      :style="getStaticHeight('genSource', 450, 450)">
+                      >
                       <pre>{{generatedSource}}</pre>
                     </div>
                   </v-col>
                 </v-row>
               </v-container>
             </v-card-text>
-            <v-card-actions>
+            <v-card-actions class="pr-8 pl-8 pt-6 pb-10 elevation-0 fourthStepperJS">
               <v-row no-gutters>
-                <v-col cols="2" class="pa-1">
+                <v-col cols="2" class="mr-3 text-center">
                   <v-select
                     v-model="selectedLang"
                     :items="genLanguages"
@@ -370,7 +384,7 @@
 <!--                <v-col cols="2" class="pa-1">-->
 <!--                  <v-btn raised @click="generateSource()">generate source</v-btn>-->
 <!--                </v-col>-->
-                <v-col cols="1" class="pa-1">
+                <v-col cols="1" class="pa-1 mr-3 ml-3">
                   <v-btn
                     v-clipboard="() => generatedSource"
                     v-clipboard:success="copyToClipSucc"
@@ -1082,20 +1096,6 @@ export default {
   .selected {
     background-color: antiquewhite;
   }
-  .jsonObj {
-    overflow-y: auto;
-    overflow-x: scroll;
-  }
-
-  #treeView {
-    max-height: calc(100vh - 440px);
-    overflow: auto;
-  }
-
-  #propEdit {
-    max-height: calc(100vh - 440px);
-    overflow: auto;
-  }
 
   div.in-control {
     display: flex;
@@ -1279,40 +1279,85 @@ export default {
   .normal-check {
     margin-top:0 !important;
   }
+  .thirdStepperWrapper {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+  }
+  .thirdStepperMenu {
+    display: flex;
+    flex: 1;
+  }
+  .thirdStepperBody {
+    display: flex;
+    flex: 1;
+  }
   .schemaInputUpperLabel {
     display: flex;
     align-items: center;
+    margin: 0 3px 0 3px;
   }
   .firstStepperContent {
-    height: calc(100vh - 300px);
+    height: calc(100vh - 250px);
     padding-bottom: 20px;
   }
-  .fisrtStepperContainer {
-    display: flex;
-    flex: 1 !important;
-    flex-direction: column;
+  .secondStepperTreeView {
+    height: calc(100vh - 350px);
+    // padding-bottom: 20px;
   }
-  .firstCard {
-    display: flex;
-    flex: 3;
-  }
-  .secondCard {
+  .secondStepperJsonObj {
+    height: calc(100vh - 350px);
     display: flex;
     flex: 1;
-    background-color: red;
+    flex-direction: column;
   }
-  .srcDataClass {
-    height: 200px;
-    min-height: 400px !important;
+  .secondStepperJsonObjTitle {
+    max-height: 400px;
+    display: flex;
+    flex-direction: column;
+    flex: 3;
+    overflow: auto;
+  }
+  #treeView {
+    height: 100%;
+  }
+  .secondStepperJsonObjDataWrapper {
+    display: flex;
+    flex: 7;
+    width: 100%;
+    overflow: auto;
+  }
+  .secondStepperJsonObjData {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+  }
+  #srcTemplate {
+    min-height: calc(100vh - 420px);
+    max-height: calc(100vh - 420px);
+    overflow: auto;
+  }
+  #propDetailList {
+    min-height: calc(100vh - 440px);
+    max-height: calc(100vh - 440px);
+    flex:1;
+    overflow: auto;
+  }
+
+  .fourthStepperObj {
+    min-height: calc(100vh - 420px);
+    max-height: calc(100vh - 420px);
+    overflow: auto;
+  }
+
+  #propEdit {
     // display: flex;
+    // flex-direction: column;
     // flex: 1;
-    // background-color: red;
-    .v-input__slot{
-      min-height: 400px !important;
-      .v-text-field__slot{
-        height: 400px !important;
-        min-height: 400px !important;
-      }
-    }
+    height:100%;
+    min-height: calc(100vh - 440px);
+    max-height: calc(100vh - 440px);
+    // height: 100%;
+    overflow: auto;
   }
 </style>
