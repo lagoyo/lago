@@ -83,8 +83,8 @@
               <v-col cols="6" >
                 <v-card class="secondStepperJsonObj">
                   <v-card v-if="activeClass" class="secondStepperJsonObjTitle">
-                    <v-sheet class="pa-2 lighten-1" color="orange">
-                      <v-card class="pa-3 lighten-2" color="orange" elevation=0>
+                    <v-sheet class="pa-2 lighten-1" color="orange" style="flex:1;">
+                      <v-card class="pa-3 lighten-2" color="orange" elevation=0 style="height:100%">
                         <span class="font-weight-bold" style="align-items:center;">{{activeClass.getName()}}</span>
                         <a class="pa-2" :target="activeClass.getName()"
                           color="rgba(0, 0, 255, 0.9)"
@@ -94,8 +94,8 @@
                     </v-sheet>
                   </v-card>
                   <div v-else class="secondStepperJsonObjTitle">
-                    <v-sheet class="pa-2 lighten-1" color="orange">
-                      <v-card class="pa-3 lighten-2" color="orange" elevation=0>
+                    <v-sheet class="pa-2 lighten-1" color="orange" style="flex:1;">
+                      <v-card class="pa-3 lighten-2 justify-center" color="orange" elevation=0 style="height:100%">
                       왼쪽의 트리에서 스키마를 선택해주세요.
                       </v-card>
                     </v-sheet>
@@ -331,7 +331,7 @@
             </v-card-actions>
           </v-card>
         </v-stepper-content>
-        <v-stepper-content step="4">
+        <v-stepper-content step="4" class="fourthStepper">
           <v-card class="mb-12" height="max-content">
             <v-card-text class="pb-0">
               <v-container fluid>
@@ -1315,7 +1315,7 @@ export default {
     max-height: 400px;
     display: flex;
     flex-direction: column;
-    flex: 3;
+    flex: 2;
     overflow: auto;
   }
   #treeView {
@@ -1333,8 +1333,8 @@ export default {
     overflow: auto;
   }
   #srcTemplate {
-    min-height: calc(100vh - 420px);
-    max-height: calc(100vh - 420px);
+    min-height: calc(100vh - 440px);
+    max-height: calc(100vh - 440px);
     overflow: auto;
   }
   #propDetailList {
@@ -1359,5 +1359,9 @@ export default {
     max-height: calc(100vh - 440px);
     // height: 100%;
     overflow: auto;
+  }
+
+  .fourthStepper {
+    max-height: calc(100vh - 200px);
   }
 </style>

@@ -1,7 +1,9 @@
 #schemdaInputJsonObj {
     
 }
-
+#propEdit .v-data-table {
+    flex: 1
+}
 .srcDataClass {
     display: flex;
     flex: 1;
