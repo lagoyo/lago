@@ -87,8 +87,8 @@
                       <v-card class="pa-3 lighten-2" color="orange" elevation=0 style="height:100%">
                         <span class="font-weight-bold" style="align-items:center;">{{activeClass.getName()}}</span>
                         <a class="pa-2" :target="activeClass.getName()"
-                          color="rgba(0, 0, 255, 0.9)"
-                            :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
+                           style="color:rgba(0, 0, 255, 0.9)"
+                           :href="activeClass.getIRI()">{{activeClass.getIRI(true)}}</a>
                           <span v-html="activeClass.getDescription()"></span>
                       </v-card>
                     </v-sheet>
@@ -450,38 +450,55 @@ export default {
       third: false,
       fourth: false,
       // 사용작 입력한 최초의 입력 데이터
-      srcData: '{\n' +
-        '  "name": "샘플",\n' +
-        '  "desc": "설명",\n' +
-        '  "url": "https://baikal.ai/",\n' +
-        '  "contentRating": "",\n' +
-        '  "award": "국어원 코퍼스 1등상",\n' +
-        '  "comment": {},\n' +
-        '  "distribution": {\n' +
-        '    "uploadDate": "2020-12-16T23:04:18Z",\n' +
-        '    "accessMode": "chartOnVisual",\n' +
-        '    "audience": {\n' +
-        '      "audienceType": "veterans"\n' +
-        '    },\n' +
-        '    "author": {\n' +
-        '      "name": "Baikal AI"\n' +
-        '    }\n' +
-        '  },\n' +
-        '  "author": {\n' +
-        '    "name": "Baikal AI",\n' +
-        '    "email": "gih2yun@baikal.ai"\n' +
-        '  },\n' +
-        '  "creator": {\n' +
-        '    "name": "Baikal AI",\n' +
-        '    "email": "gih2yun@baikal.ai"\n' +
-        '  },\n' +
-        '  "dateCreated": "2020-12-16T23:04:18Z",\n' +
-        '  "dateModified": "2020-12-16T23:04:18Z",\n' +
-        '  "datePublished": "2020-12-16T23:04:18Z",\n' +
-        '  "genre": "Korean Language",\n' +
-        '  "typicalAgeRange": "7-21"\n' +
-        '}',
+      srcData: '{' +
+        '\n  name: "샘",' +
+        '\n  desc: "설명",' +
+        '\n  url: "https://baikal.ai/", ' +
+        '\n  author: {' +
+        '\n    email: "author@company.com",' +
+        '\n   name: "A 빅데이터" ' +
+        '\n  }, ' +
+        '\n  award: "대한민국 빅데이터 2020 대상", ' +
+        '\n  creator: {  ' +
+        '\n    email: "author@company.com",' +
+        '\n   name: "A 빅데이터"' +
+        '\n  },' +
+        '\n  dateCreated: "2020-12-16T23:04:18Z",' +
+        '\n  dateModified: "2020-12-16T23:04:18Z",' +
+        '\n  datePublished: "2020-12-16T23:04:18Z",' +
+        '\n  distribution: {' +
+        '\n    accessMode: "chartOnVisual",' +
+        '\n    audience: {' +
+        '\n     audienceType: "veterans"' +
+        '\n    }' +
+        '\n  },' +
+        '\n typicalAgeRange: "7-21"' +
+        '\n}\n',
       srcObject: null,
+      srcObj: {
+        name: '샘플',
+        desc: '설명',
+        url: 'https://baikal.ai/',
+        author: {
+          email: 'gih2yun@baikal.ai',
+          name: 'Baikal AI'
+        },
+        award: '국어원 코퍼스 1등상',
+        creator: {
+          email: 'gih2yun@baikal.ai',
+          name: 'Baikal AI'
+        },
+        dateCreated: '2020-12-16T23:04:18Z',
+        dateModified: '2020-12-16T23:04:18Z',
+        datePublished: '2020-12-16T23:04:18Z',
+        distribution: {
+          accessMode: 'chartOnVisual',
+          audience: {
+            audienceType: 'veterans'
+          }
+        },
+        typicalAgeRange: '7-21'
+      },
       secondStepError: null,
       firstStepError: null,
       // 현재 활성화된 스텝 정보
@@ -543,14 +560,25 @@ export default {
         try {
           this.srcObject = JSON.parse(this.srcData)
           if (this.srcObject !== null) {
-            // console.log(this.srcData)
-            // console.log(this.srcObject)
             this.setDone(1, 2)
           } else {
             console.log('catch error!')
             this.firstStepError = 'Source Object is empty!'
           }
         } catch (err) {
+          if (err instanceof SyntaxError) {
+            try {
+              const noquoteJson = /("(.*?)"|(\w+))(\s*:\s*(".*?"|.))/ig
+              const tempStr = this.srcData.replace(noquoteJson, '"$2$3"$4')
+              const tempObj = JSON.parse(tempStr)
+              if (tempObj !== null) {
+                this.srcObject = tempObj
+                this.setDone(1, 2)
+              }
+            } catch (e2) {
+              console.log('e2', e2)
+            }
+          }
           console.log('catch error!', err)
           this.firstStepError = err.toString()
         }
@@ -881,75 +909,6 @@ export default {
       console.log('after v subsub', temp)
       this.template = temp
     },
-    // setHeight (elementId, divisionRate) {
-    //   const windowHeight = this.windowHeight
-    //   // console.log('onLoad () window height ', windowHeight)
-    //   // console.log(' onLoad () return ', windowHeight * divisionRate)
-    //
-    //   const elem = document.getElementById(elementId)
-    //   if (elem != null) {
-    //     // console.log(elem)
-    //     elem.style.height = windowHeight * divisionRate + 'px'
-    //     // console.log('onLoad () set ' + elementId)
-    //   } else {
-    //     // console.log('onLoad () ' + elementId + ' is null')
-    //   }
-    // },
-    setStaticHeight (elementId, subVal, maxHeight = false, overflow = false) {
-      const windowHeight = this.windowHeight
-      // console.log('window height ', windowHeight)
-      // console.log('return ', windowHeight - subVal)
-
-      // console.log('return obj ', { height: windowHeight - subVal + 'px' })
-      const elem = document.getElementById(elementId)
-      let styleString = ''
-
-      if (elem != null) {
-        // console.log(elem)
-
-        if (maxHeight !== false) {
-          styleString += 'height: ' + String(windowHeight - subVal) + 'px;'
-          styleString += 'max-height: ' + String(windowHeight - subVal) + 'px;'
-        } else {
-          styleString += 'height: ' + String(windowHeight - subVal) + 'px;'
-        }
-        if (overflow !== false) {
-          styleString += 'overflow: auto;'
-        } else {
-        }
-        elem.style = styleString
-        // console.log('set ' + elementId + '=' + styleString)
-      } else {
-        // console.log(elementId + ' is null')
-      }
-    },
-    // getHeight (elementId, divisionRate) {
-    //   const windowHeight = this.windowHeight
-    //   // console.log('window height ', windowHeight)
-    //   // console.log('return ', windowHeight * divisionRate)
-    //
-    //   // console.log('return obj ', { height: windowHeight * divisionRate + 'px' })
-    //   const elem = document.getElementById(elementId)
-    //   if (elem != null) {
-    //     // console.log(elem)
-    //     elem.style.height = windowHeight * divisionRate + 'px'
-    //     // console.log('set ' + elementId)
-    //   } else {
-    //     // console.log(elementId + ' is null')
-    //   }
-    //
-    //   return { height: windowHeight * divisionRate + 'px' }
-    // },
-    getSchemaDescHeight () {
-      const propDOM = this.$refs.shcemaInputDesc
-      if (propDOM != null) {
-        // console.log('getSchemaDescHeight is ' + propDOM.clientHeight)
-        return propDOM.clientHeight
-      } else {
-        // console.log('getSchemaDescHeight is None')
-        return 0
-      }
-    },
     generateSource () {
       this.generatedSource = gen.generateSource(this.selectedLang,
         this.activeClass.getName(),
@@ -959,49 +918,10 @@ export default {
     saveToLocalStorage () {
       // 로컬 스토리지에 저장하기
       this.openSnack('작업 결과를 로컬스토리지에 저장했습니다.')
-    },
-    getStaticHeight (elementId, subVal, maxHeight = false, overflow = false) {
-      const windowHeight = this.windowHeight
-      // console.log('window height ', windowHeight)
-      // console.log('return ', windowHeight - subVal)
-
-      // console.log('return obj ', { height: windowHeight - subVal + 'px' })
-      const elem = document.getElementById(elementId)
-      let styleString = ''
-      const styleObj = {}
-
-      if (elem != null) {
-        // console.log(elem)
-
-        if (maxHeight !== false) {
-          styleString += 'height: ' + String(windowHeight - subVal) + 'px;'
-          styleString += 'max-height: ' + String(windowHeight) - subVal + 'px;'
-          styleObj.height = String(windowHeight) - subVal + 'px'
-          styleObj.maxHeight = String(windowHeight) - subVal + 'px'
-        } else {
-          styleString += 'height: ' + String(windowHeight - subVal) + 'px;'
-          styleObj.height = String(windowHeight - subVal) + 'px'
-        }
-        if (overflow !== false) {
-          styleString += 'overflow: auto;'
-          styleObj.overflow = 'auto'
-        } else {
-        }
-        elem.style = styleString
-        console.log('set ' + elementId + '=' + styleString)
-        return styleObj
-      } else {
-        // console.log(elementId + ' is null')
-      }
     }
-
   },
   mounted () {
     this.$nextTick(() => {
-      // this.setStaticHeight('srcData', 350, 350)
-      // this.setStaticHeight('schemaInputWrapper', 300)
-      // this.setStaticHeight('treeView', 450, 450)
-      // this.setStaticHeight('schemdaInputJsonObj', 550, 550)
       window.addEventListener('resize', this.onResize)
     })
   },
