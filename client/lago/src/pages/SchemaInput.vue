@@ -23,7 +23,7 @@
             <v-row>
               <v-col cols="12">
                 <v-card elevation="0">
-                  <v-textarea v-model="srcData" class="srcDataClass" rows="auto"
+                  <v-textarea v-model="srcData" class="srcDataClass"
                   placeholder="JSON.stringify(srcData)">
                   </v-textarea>
                   <v-content v-if="firstStepError"><p>{{firstStepError}}</p></v-content>
@@ -453,7 +453,7 @@ export default {
       srcData: '{' +
         '\n  name: "샘",' +
         '\n  desc: "설명",' +
-        '\n  url: "https://baikal.ai/", ' +
+        '\n  url: "https://a-big-data.com/", ' +
         '\n  author: {' +
         '\n    email: "author@company.com",' +
         '\n   name: "A 빅데이터" ' +
@@ -475,30 +475,6 @@ export default {
         '\n typicalAgeRange: "7-21"' +
         '\n}\n',
       srcObject: null,
-      srcObj: {
-        name: '샘플',
-        desc: '설명',
-        url: 'https://baikal.ai/',
-        author: {
-          email: 'gih2yun@baikal.ai',
-          name: 'Baikal AI'
-        },
-        award: '국어원 코퍼스 1등상',
-        creator: {
-          email: 'gih2yun@baikal.ai',
-          name: 'Baikal AI'
-        },
-        dateCreated: '2020-12-16T23:04:18Z',
-        dateModified: '2020-12-16T23:04:18Z',
-        datePublished: '2020-12-16T23:04:18Z',
-        distribution: {
-          accessMode: 'chartOnVisual',
-          audience: {
-            audienceType: 'veterans'
-          }
-        },
-        typicalAgeRange: '7-21'
-      },
       secondStepError: null,
       firstStepError: null,
       // 현재 활성화된 스텝 정보
@@ -562,7 +538,7 @@ export default {
           if (this.srcObject !== null) {
             this.setDone(1, 2)
           } else {
-            console.log('catch error!')
+            // console.log('catch error!')
             this.firstStepError = 'Source Object is empty!'
           }
         } catch (err) {
@@ -576,11 +552,12 @@ export default {
                 this.setDone(1, 2)
               }
             } catch (e2) {
+              this.firstStepError = e2.toString()
               console.log('e2', e2)
             }
+          } else {
+            this.firstStepError = err.toString()
           }
-          console.log('catch error!', err)
-          this.firstStepError = err.toString()
         }
       }
     },
@@ -606,7 +583,7 @@ export default {
       if (index) {
         this.step = index
         this.active = index
-        console.log('setDone active', this.active)
+        // console.log('setDone active', this.active)
         this.secondStepError = null
         if (this.step === 2) {
           // console.log(this.$sdo.sdoClasses)
@@ -906,7 +883,6 @@ export default {
         }
       })
 
-      console.log('after v subsub', temp)
       this.template = temp
     },
     generateSource () {

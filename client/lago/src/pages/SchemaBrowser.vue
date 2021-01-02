@@ -86,7 +86,6 @@ export default {
     }
   },
   mounted () {
-    console.log('mounted')
   },
   props: {
     tableHeaderColor: {
@@ -99,8 +98,6 @@ export default {
       return this.$sdo.sdoClasses
     },
     checkReady () {
-      console.log('this.$sdo', this.$sdo)
-      console.log('sdo ready', typeof this.$sdo.sdoClasses)
       return this.$sdo && this.$sdo.sdoClasses && this.$sdo.sdoClasses.length > 0
     },
     headers () {
@@ -123,18 +120,18 @@ export default {
   methods: {
     getProps (thing) {
       const name = thing.getName()
-      console.log('thing get props', name)
+      // console.log('thing get props', name)
       const prev = this.props[name]
-      console.log('prev', prev)
+      // console.log('prev', prev)
       if (prev !== undefined && prev.length > 0) {
-        console.log('this properties already retrieved!', prev.length)
+        // console.log('this properties already retrieved!', prev.length)
         return prev.length
       }
       const props = thing.getProperties(false).sort()
       const tempProps = []
       props.forEach((p, idx) => {
         const name = p.split(':')[1]
-        console.log('prop', p, 'name', name)
+        // console.log('prop', p, 'name', name)
         const prop = this.$sdo.sdo.getProperty(p)
         const dataTypes = prop.getRanges(false)
         const strTypes = []
@@ -170,19 +167,19 @@ export default {
       this.superClasses.push(this.selected)
 
       this.scs = obj.getSuperClasses(true)
-      console.log('super classes', this.scs)
+      // console.log('super classes', this.scs)
       this.scs.forEach((sc, idx) => {
         if (sc.indexOf('schema:') < 0) {
-          console.log('ignore sc is not schema.')
+          // console.log('ignore sc is not schema.')
           return
         }
         const name = sc.split(':')[1]
-        console.log('super classes', sc, 'name', name)
+        // console.log('super classes', sc, 'name', name)
         const cl = this.$sdo.sdo.getClass(sc)
         cl.propsCount = this.getProps(cl)
         cl.name = name
         cl.id = 'tab-' + (idx + 1).toString()
-        console.log('super class', cl)
+        // console.log('super class', cl)
         this.superClasses.push(cl)
 
         if (idx === (this.scs.length - 1)) {

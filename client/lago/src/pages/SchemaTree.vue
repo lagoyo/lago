@@ -198,7 +198,7 @@ export default {
         let cl = active
         while (cl !== null) {
           const clCategory = cl.getSuperClasses(false)
-          console.log(clCategory, clCategory.length)
+          // console.log(clCategory, clCategory.length)
           if (clCategory.length > 0) {
             cl = this.$sdo.sdo.getClass(clCategory[0])
             cls.push(cl)
@@ -225,8 +225,6 @@ export default {
       return all
     },
     checkReady () {
-      console.log('this.$sdo', this.$sdo)
-      console.log('sdo ready', typeof this.$sdo.sdoClasses)
       return this.$sdo && this.$sdo.sdoClasses && this.$sdo.sdoClasses.length > 0
     }
   },
@@ -257,8 +255,8 @@ export default {
     },
     setPropViewHeight (height, nameHeight, descHeight) {
       console.log('param ', height, ' ', nameHeight, ' ', descHeight)
-      var propViewDOM = document.getElementById('propView')
-      var styleString = 'height: ' + (height - nameHeight - descHeight) + 'px;'
+      const propViewDOM = document.getElementById('propView')
+      let styleString = 'height: ' + (height - nameHeight - descHeight) + 'px;'
       styleString += 'overflow: auto;'
       console.log('set to ' + 'height: ' + (height - nameHeight - descHeight) + 'px')
       propViewDOM.style = styleString
@@ -276,7 +274,7 @@ export default {
       const props = []
       for (const p of ps) {
         const name = p.split(':')[1]
-        console.log('prop', p, 'name', name)
+        // console.log('prop', p, 'name', name)
         const prop = this.$sdo.sdo.getProperty(p)
         const dataTypes = prop.getRanges(false)
         const strTypes = []
@@ -293,7 +291,7 @@ export default {
       return { name, props }
     },
     setPropKey (prop) {
-      console.log('set prop key', prop)
+      // console.log('set prop key', prop)
       this.chipPropKey = prop
     },
     clearPropKey () {
@@ -318,19 +316,19 @@ export default {
       this.superClasses.push(this.selected)
 
       this.scs = obj.getSuperClasses(true)
-      console.log('super classes', this.scs)
+      // console.log('super classes', this.scs)
       this.scs.forEach((sc, idx) => {
         if (sc.indexOf('schema:') < 0) {
-          console.log('ignore sc is not schema.')
+          // console.log('ignore sc is not schema.')
           return
         }
         const name = sc.split(':')[1]
-        console.log('super classes', sc, 'name', name)
+        // console.log('super classes', sc, 'name', name)
         const cl = this.$sdo.sdo.getClass(sc)
         cl.propsCount = this.getProps(cl)
         cl.name = name
         cl.id = 'tab-' + (idx + 1).toString()
-        console.log('super class', cl)
+        // console.log('super class', cl)
         this.superClasses.push(cl)
 
         if (idx === (this.scs.length - 1)) {
