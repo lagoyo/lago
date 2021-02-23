@@ -1215,7 +1215,8 @@ export default {
     overflow: auto;
   }
   #treeView {
-    height: 100%;
+    height: calc(100vh - 420px);
+    overflow: auto;
   }
   .secondStepperJsonObjDataWrapper {
     display: flex;
