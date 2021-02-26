@@ -27,11 +27,11 @@ export default {
     return {
       activeTab: '/schema/browser',
       tabs: [
-        { id: 1, name: 'Dashboard', route: '/dashboard' },
+        // { id: 1, name: 'Dashboard', route: '/dashboard' },
         { id: 2, name: 'Input Schema', route: '/schema/gencode' },
         { id: 3, name: 'Schema Browser', route: '/schema/browser' },
         { id: 4, name: 'Schema Tree', route: '/schema/tree' },
-        { id: 5, name: 'My Schemas', route: '/schema/my' },
+        // { id: 5, name: 'My Schemas', route: '/schema/my' },
         { id: 6, name: 'About', route: '/schema/about' }
       ]
     }
